@@ -7,7 +7,7 @@
 - Cloner le projet
 
 ```bash
-git clone https://git.iut-orsay.fr/nmoham3/s501.git
+https://github.com/projet-nao-s501/projet-s501.git
 ```
 
 - installer [docker](https://docs.docker.com/engine/install/)
