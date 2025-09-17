@@ -88,4 +88,3 @@ python main.py --ip <adresse IP> --port <numéro de port>
 ## Organisation du git
 
 Tout est donné dans ce [lien](https://naos501g1.atlassian.net/wiki/spaces/SCRUM/pages/3244054/R+gle+de+d+veloppement?atlOrigin=eyJpIjoiM2RjZTEyNTI4YmY2NDQzY2I3OWU2ODU5YTdmMWJjODMiLCJwIjoiaiJ9)
-
