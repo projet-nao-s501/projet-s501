@@ -1,19 +1,19 @@
-# s501
+****# Exemple de Projet NAO avec recuperation du flux video
 
-## Configurer le projet NAO
-
-### Docker
-
-- Cloner le projet
-
+## Installation de packages sur Linux
 ```bash
-https://github.com/projet-nao-s501/projet-s501.git
-```
+sudo apt update
+sudo sudo apt install v4l2loopback-dkms v4l2loopback-utils 
+````
 
-- installer [docker](https://docs.docker.com/engine/install/)
+## Mise en place coté Visuel Studio Code ou VSCodium
+Installer l'extension Python
 
-- Construisez l'image puis lancer le conteneur
 
+## Mise en place de l'environnement virtuel Python
+Cloner ce dépôt puis mettre en place
+un environnement virtuel Python. Ensuite installer 
+les dépendances :
 ```bash
 docker build -t s501-nao .
 docker run -it --name nao-s501 -p 60323:60323 s501-nao bash
