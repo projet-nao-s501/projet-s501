@@ -1,19 +1,9 @@
-# Projet-s501
+# Projet nao-s501
 
-## Installation de packages sur Linux
-```bash
-sudo apt update
-sudo sudo apt install v4l2loopback-dkms v4l2loopback-utils 
-````
+## Installation
 
-## Mise en place coté Visuel Studio Code ou VSCodium
-Installer l'extension Python
+### Docker
 
-
-## Mise en place de l'environnement virtuel Python
-Cloner ce dépôt puis mettre en place
-un environnement virtuel Python. Ensuite installer 
-les dépendances :
 ```bash
 docker build -t s501-nao .
 docker run -it --name nao-s501 -p 60323:60323 s501-nao bash
@@ -92,7 +82,7 @@ source venv/bin/activate
 - Executez le fichier test
 
 ```bash
-python main.py --qi-url=tcp://<Adresse IP du robot>:<port>
+python main.py --ip <adresse IP> --port <numéro de port>
 ```
 
 ## Organisation du git
