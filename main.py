@@ -13,6 +13,7 @@ import sys
 import time
 import cv2
 import numpy as np
+from projet_s501.app.scripts import *
 
 from keras.models import load_model  # TensorFlow is required for Keras to work
 
