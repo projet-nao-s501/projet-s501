@@ -6,7 +6,7 @@
 
 ```bash
 docker build -t s501-nao .
-docker run -it --name nao-s501 -p 60323:60323 s501-nao bash
+docker run -it --name nao-s501 s501-nao bash
 ```
 
 ### OS Linux
@@ -14,18 +14,13 @@ docker run -it --name nao-s501 -p 60323:60323 s501-nao bash
 - Installer les paquages suivants :
   - build-essential
   - cmake
-  - libpython3-dev
-  - python3-venv
+- utiliser python 3.11.2 précisément pour que la version de tensorflow soit valable
 
 - cloner le projet :
 
 ```bash
 git clone https://github.com/zykogithub/s501-nao.git
 ```
-
-- Créer un fichier requirements.txt avec comme librairies à installer :
-  - qi
-- remarques : de futurs librairies pourraient être utilisé à l'avenir
 
 - Créer l'environnement virtuel
 
@@ -39,7 +34,7 @@ python3 -m venv venv
 
 ### Lancement Docker
 
-Quelques commandes supplémentaires sont à exécutez en fonction de votre OS, si vous utilisez le simulateur de naoqi
+Quelques commandes supplémentaires sont à exécutez en fonction de votre OS d'origine, si vous voulez utiliser le simulateur de naoqi
 
 #### Windows
 
@@ -74,10 +69,6 @@ docker run -it --network host projet-nao s501-nao
 ```bash
 source venv/bin/activate
 ```
-
-- Aller dans le dossier
-
-> projet_s501/app/scripts
 
 - Executez le fichier test
 
