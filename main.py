@@ -10,10 +10,9 @@
 import qi
 import argparse
 import sys
-import time
 import cv2
 import numpy as np
-from projet_s501.app.scripts import *
+# from projet_s501.app.scripts import * : paquage avec le code à developper 
 
 from keras.models import load_model  # TensorFlow is required for Keras to work
 
