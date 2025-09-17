@@ -11,10 +11,7 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-COPY ./s501 /app/
-
-RUN echo "qi" > requirements.txt
+COPY . /app/
 
 RUN python3 -m venv venv
 RUN /app/venv/bin/pip install --upgrade pip
-RUN /app/venv/bin/pip install -r requirements.txt
