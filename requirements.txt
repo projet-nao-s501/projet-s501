@@ -2,3 +2,4 @@ qi
 tensorflow == 2.12.1
 numpy == 1.23.5
 opencv-python == 4.9.0.80
+pyvirtualcam
