@@ -16,7 +16,7 @@ https://github.com/projet-nao-s501/projet-s501.git
 
 ```bash
 docker build -t s501-nao .
-docker run -it --name projet-nao s501-nao
+docker run -it --name nao-s501 -p 60323:60323 s501-nao bash
 ```
 
 ### OS Linux
