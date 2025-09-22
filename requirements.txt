@@ -2,7 +2,7 @@ absl-py==2.3.1
 astunparse==1.6.3
 cachetools==5.5.2
 certifi==2025.8.3
-charset-normalizer==B.4.3
+charset-normalizer==3.4.3
 flatbuffers==25.2.10
 gast==0.4.0
 google-auth==2.40.3
@@ -18,9 +18,9 @@ libclang==18.1.1
 Markdown==3.9
 MarkupSafe==3.0.2
 ml_dtypes==0.5.3
-numpy==1.23.5
+numpy==1.24.3
 oauthlib==3.3.1
-opencv-python==4.9.0.80
+opencv-python-headless==4.9.0.80
 opt_einsum==3.4.0
 packaging==25.0
 protobuf==4.25.8
@@ -39,7 +39,7 @@ tensorflow==2.12.1
 tensorflow-estimator==2.12.0
 tensorflow-io-gcs-filesystem==0.37.1
 termcolor==3.1.0
-typingextensions==4.5.0
+typing_extensions==4.5.0
 urllib3==2.5.0
 Werkzeug==3.1.3
 wrapt==1.14.2
