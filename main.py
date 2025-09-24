@@ -49,6 +49,7 @@ def main(session):
     # print("Subscribed to camera:", name_id)
 
     while True:
+        pass
         # image = video_service.getImageRemote(name_id)
         # if image is None:
         #     print("No image.")
@@ -83,11 +84,11 @@ def main(session):
         # # Mise en place motion_service
         motion_service  = session.service("ALMotion")
 
-        # Wake up robot
-        motion_service.wakeUp()
+        # # Wake up robot
+        # motion_service.wakeUp()
 
-        posture_service = session.service("ALRobotPosture")
-        posture_service.goToPosture("StandInit", 1.0)
+        # posture_service = session.service("ALRobotPosture")
+        # posture_service.goToPosture("StandInit", 1.0)
 
 
         # # Marcher devant 
@@ -105,6 +106,41 @@ def main(session):
 
         # if cv2.waitKey(1) & 0xFF == ord('q'):
         #     break
+
+    # Get the services ALMemory and ALSonar.
+
+        memory_service = session.service("ALMemory")
+        sonar_service = session.service("ALSonar")
+
+        # Subscribe to sonars, this will launch sonars (at hardware level)
+        # and start data acquisition.
+        sonar_service.subscribe("myApplication")
+
+        # Now you can retrieve sonar data from ALMemory.
+        # Get sonar left first echo (distance in meters to the first obstacle).
+        leftSensor = memory_service.getData("Device/SubDeviceList/US/Left/Sensor/Value")
+
+        # Same thing for right.
+        rightSensor = memory_service.getData("Device/SubDeviceList/US/Right/Sensor/Value")
+
+        print(f"left sensor {leftSensor} ; right sensor {rightSensor}")
+
+        # Unsubscribe from sonars, this will stop sonars (at hardware level)
+        sonar_service.unsubscribe("myApplication")
+
+        # Please read Sonar ALMemory keys section
+        # if you want to know the other values you can get.
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--ip", type=str, default="127.0.0.1",
+                        help="Robot IP address. On robot or Local Naoqi: use '127.0.0.1'.")
+    parser.add_argument("--port", type=int, default=9559,
+                        help="Naoqi port number")
+
+    args = parser.parse_args()
+    session = qi.Session()
 
     # print("Unsubscribing...")
     # video_service.unsubscribe(name_id)
