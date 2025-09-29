@@ -37,9 +37,29 @@ except ImportError:
 
 class MockVideoService:
     """Service vidéo simulé pour les tests"""
-    def __init__(self):
+    def __init__(self, use_webcam=True):
         self.subscribed = False
         self.frame_count = 0
+        self.use_webcam = use_webcam
+        self.webcam = None
+        
+        # Essayer d'ouvrir la webcam si demandé
+        if use_webcam:
+            try:
+                self.webcam = cv2.VideoCapture(0)  # Webcam par défaut
+                if not self.webcam.isOpened():
+                    print("⚠️ Webcam non accessible, passage en mode graphique")
+                    self.webcam = None
+                    self.use_webcam = False
+                else:
+                    print("📹 Webcam détectée - Mode simulation réaliste")
+                    # Configurer la résolution
+                    self.webcam.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+                    self.webcam.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+            except Exception as e:
+                print(f"⚠️ Erreur webcam: {e} - Mode graphique")
+                self.webcam = None
+                self.use_webcam = False
     
     def subscribeCamera(self, name_id, camera_index, resolution, color_space, fps):
         self.subscribed = True
@@ -50,29 +70,105 @@ class MockVideoService:
         if not self.subscribed:
             return None
             
-        # Génération d'une image de test colorée
         self.frame_count += 1
         width, height = 640, 480
         
-        # Création d'une image de test avec un motif qui change
-        img = np.zeros((height, width, 3), dtype=np.uint8)
+        # Utiliser la webcam si disponible
+        if self.use_webcam and self.webcam is not None:
+            ret, frame = self.webcam.read()
+            if ret:
+                # Redimensionner si nécessaire
+                if frame.shape[:2] != (height, width):
+                    frame = cv2.resize(frame, (width, height))
+                
+                # Convertir BGR vers RGB (format NAO)
+                img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                
+                # Ajouter overlay NAO
+                cv2.rectangle(img, (5, 5), (300, 100), (0, 0, 0), -1)  # Fond noir
+                cv2.rectangle(img, (5, 5), (300, 100), (255, 255, 255), 2)  # Bordure
+                
+                cv2.putText(img, f"NAO CAM SIM - Frame #{self.frame_count}", 
+                           (15, 30), cv2.FONT_HERSHEY_SIMPLEX, 
+                           0.5, (255, 255, 255), 1)
+                
+                cv2.putText(img, f"IP: 172.16.1.164 (Webcam)", 
+                           (15, 50), cv2.FONT_HERSHEY_SIMPLEX, 
+                           0.4, (100, 255, 255), 1)
+                
+                cv2.putText(img, f"Real Camera Feed", 
+                           (15, 75), cv2.FONT_HERSHEY_SIMPLEX, 
+                           0.4, (100, 255, 100), 1)
+                
+                time.sleep(1/15)  # Simuler 15 FPS
+                return (width, height, 3, 0, 0, 0, img.tobytes())
         
-        # Gradient de couleur qui change avec le temps
-        for y in range(height):
-            for x in range(width):
-                r = int((x + self.frame_count) % 255)
-                g = int((y + self.frame_count // 2) % 255)
-                b = int((x + y + self.frame_count // 4) % 255)
-                img[y, x] = [r, g, b]
+        # Fallback: génération d'une image de test réaliste
         
-        # Ajout de texte
-        cv2.putText(img, f"NAO Camera DEMO - Frame {self.frame_count}", 
-                   (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 
-                   1, (255, 255, 255), 2)
+        # Création d'une image de fond avec des motifs géométriques
+        img = np.full((height, width, 3), (50, 100, 150), dtype=np.uint8)  # Fond bleu-gris
         
-        cv2.putText(img, f"IP: 172.16.1.164 (simulee)", 
-                   (10, 70), cv2.FONT_HERSHEY_SIMPLEX, 
-                   0.7, (255, 255, 255), 2)
+        # Ajouter des motifs géométriques qui bougent
+        time_offset = self.frame_count * 0.1
+        
+        # Cercles colorés qui bougent
+        for i in range(3):
+            center_x = int(160 + 160 * i + 50 * np.sin(time_offset + i))
+            center_y = int(240 + 100 * np.cos(time_offset * 0.7 + i))
+            radius = int(30 + 15 * np.sin(time_offset * 2 + i))
+            
+            colors = [(255, 100, 100), (100, 255, 100), (100, 100, 255)]
+            cv2.circle(img, (center_x, center_y), radius, colors[i], -1)
+        
+        # Rectangles qui tournent
+        for i in range(2):
+            center_x = int(100 + 200 * i + 100 * np.cos(time_offset + i * 1.5))
+            center_y = int(150 + 80 * np.sin(time_offset * 1.3 + i))
+            
+            # Points du rectangle
+            pts = np.array([
+                [center_x - 40, center_y - 20],
+                [center_x + 40, center_y - 20],
+                [center_x + 40, center_y + 20],
+                [center_x - 40, center_y + 20]
+            ], np.int32)
+            
+            colors = [(255, 255, 100), (255, 100, 255)]
+            cv2.fillPoly(img, [pts], colors[i])
+        
+        # Lignes dynamiques
+        for i in range(5):
+            y = int(50 + i * 80 + 30 * np.sin(time_offset * 3 + i))
+            cv2.line(img, (0, y), (width, y), (200, 200, 200), 2)
+        
+        # Grille de référence
+        for x in range(0, width, 80):
+            cv2.line(img, (x, 0), (x, height), (80, 80, 80), 1)
+        for y in range(0, height, 60):
+            cv2.line(img, (0, y), (width, y), (80, 80, 80), 1)
+        
+        # Informations de démo avec fond pour lisibilité
+        cv2.rectangle(img, (5, 5), (635, 120), (0, 0, 0), -1)  # Fond noir
+        cv2.rectangle(img, (5, 5), (635, 120), (255, 255, 255), 2)  # Bordure
+        
+        cv2.putText(img, f"NAO CAMERA SIMULATION - Frame #{self.frame_count}", 
+                   (15, 35), cv2.FONT_HERSHEY_SIMPLEX, 
+                   0.8, (255, 255, 255), 2)
+        
+        cv2.putText(img, f"IP: 172.16.1.164 (Mode Demo)", 
+                   (15, 65), cv2.FONT_HERSHEY_SIMPLEX, 
+                   0.6, (100, 255, 255), 2)
+        
+        cv2.putText(img, f"Resolution: {width}x{height} | FPS: ~15", 
+                   (15, 95), cv2.FONT_HERSHEY_SIMPLEX, 
+                   0.5, (200, 200, 200), 1)
+        
+        # Indicateur de temps réel
+        import datetime
+        timestamp = datetime.datetime.now().strftime("%H:%M:%S")
+        cv2.putText(img, f"Time: {timestamp}", 
+                   (480, 95), cv2.FONT_HERSHEY_SIMPLEX, 
+                   0.5, (100, 255, 100), 1)
         
         time.sleep(1/15)  # Simuler 15 FPS
         
@@ -82,6 +178,11 @@ class MockVideoService:
     def unsubscribe(self, name_id):
         self.subscribed = False
         print(f"[DEMO] Désabonnement caméra: {name_id}")
+        
+        # Libérer la webcam si utilisée
+        if self.webcam is not None:
+            self.webcam.release()
+            print("📹 Webcam libérée")
 
 class MockSession:
     """Session simulée pour les tests"""
