@@ -151,58 +151,73 @@ def sit_down(session):
     except Exception as e:
         print(f"❌ Erreur pour s'asseoir: {e}")
 
-def scan_person_vertical(session, pause_duration=2.0):
-    """Scan vertical de la personne en 3 crans: pieds -> torse -> tête"""
+def scan_person_vertical(session, pause_duration=4.0):
+    """Scan vertical de la personne en 3 crans: pieds -> torse -> tête
+    Met les bras en avant pour permettre au robot de regarder plus haut avec équilibre
+    """
     try:
         motion_service = session.service("ALMotion")
         
         print("🔍 === DÉBUT DU SCAN VERTICAL DE LA PERSONNE ===")
+        print("🤲 Préparation: positionnement des bras pour équilibre...")
         
-        # Préparer le robot avec les bras en avant
+        # Préparer le robot avec les bras en avant pour l'équilibre
         set_arms_forward(session)
         
-        # Positions pour le scan vertical (3 crans)
+        # Positions pour le scan vertical (3 crans) - angles optimisés avec bras en avant
         scan_positions = {
-            "pieds": -0.5,      # Regard vers le bas (pieds)
-            "torse": -0.1,      # Regard vers le torse
-            "tete": 0.3         # Regard vers le haut (tête)
+            "pieds": -0.6,      # Regard vers le bas (pieds) - plus bas possible
+            "torse": 0.0,       # Regard vers le torse (horizon)
+            "tete": 0.4         # Regard vers le haut (tête) - plus haut grâce aux bras
         }
         
         # Parcourir les 3 positions
         for i, (position_name, pitch_angle) in enumerate(scan_positions.items(), 1):
             print(f"📍 Cran {i}/3 : Scan de la zone '{position_name.upper()}'")
             
-            # Mouvement de la tête
-            motion_service.setAngles("HeadPitch", pitch_angle, 0.2)
-            time.sleep(1.5)
+            # Mouvement de la tête avec vitesse adaptée
+            motion_service.setAngles("HeadPitch", pitch_angle, 0.15)  # Plus lent pour stabilité
+            time.sleep(2.0)  # Temps pour stabiliser le mouvement
             
             # Log de l'équilibre pendant le scan
+            print(f"   ⚖️ Vérification équilibre...")
             get_balance_data(session)
             
             print(f"   📐 Position {position_name}: {pitch_angle:.2f} rad ({pitch_angle*180/math.pi:.1f}°)")
             
-            # Pause pour observation/capture
-            print(f"   ⏱️ Capture en cours... ({pause_duration}s)")
-            time.sleep(pause_duration)
+            # Pause pour observation/capture - 4 secondes comme demandé
+            print(f"   ⏱️ Scan en cours... ({pause_duration}s)")
+            for countdown in range(int(pause_duration), 0, -1):
+                print(f"   ⏳ Analyse zone {position_name}: {countdown}s restantes", end="\r")
+                time.sleep(1.0)
+            print(f"   ✅ Zone {position_name} analysée                        ")
         
-        print("✅ === FIN DU SCAN VERTICAL ===")
+        print("\n🎯 Retour en position neutre...")
+        # Remettre la tête au centre
+        motion_service.setAngles("HeadPitch", 0.0, 0.2)
+        time.sleep(1.5)
+        
+        print("✅ === FIN DU SCAN VERTICAL DE LA PERSONNE ===")
         
     except Exception as e:
         print(f"❌ Erreur lors du scan vertical: {e}")
 
 def scan_head_horizontal(session, steps=5):
-    """Scan horizontal: tourne la tête selon les limites NAOqi"""
+    """Scan horizontal: tourne la tête selon les limites NAOqi
+    Temps entre chaque cran: 4 secondes
+    """
     try:
         motion_service = session.service("ALMotion")
         
-        print("🔄 === DÉBUT DU SCAN HORIZONTAL ===")
+        print("🔄 === DÉBUT DU SCAN HORIZONTAL DE LA TÊTE ===")
         
         # Limites officielles NAOqi pour HeadYaw
         # Ref: http://doc.aldebaran.com/2-8/family/robots/joints_robot.html
         yaw_min, yaw_max = -2.0857, 2.0857  # Limites réelles NAO (-119.5° à +119.5°)
         yaw_step = (yaw_max - yaw_min) / (steps - 1)
         
-        print(f"   Amplitude: {yaw_min*180/math.pi:.1f}° à {yaw_max*180/math.pi:.1f}° en {steps} étapes")
+        print(f"   📊 Amplitude: {yaw_min*180/math.pi:.1f}° à {yaw_max*180/math.pi:.1f}° en {steps} étapes")
+        print(f"   ⏱️ Temps par cran: 4 secondes")
         
         for i in range(steps):
             yaw_angle = yaw_min + (i * yaw_step)
@@ -217,16 +232,27 @@ def scan_head_horizontal(session, steps=5):
             else:
                 position = f"Position {i+1}"
             
-            print(f"↔️ Scan horizontal: {position}")
+            print(f"\n↔️ Cran {i+1}/{steps}: {position}")
+            print(f"   📐 Angle: {yaw_angle:.2f} rad ({yaw_angle*180/math.pi:.1f}°)")
             
             # Mouvement de la tête
-            motion_service.setAngles("HeadYaw", yaw_angle, 0.2)
-            time.sleep(1.0)
+            motion_service.setAngles("HeadYaw", yaw_angle, 0.15)  # Plus lent
+            time.sleep(1.5)  # Temps de stabilisation
             
             # Log équilibre
+            print(f"   ⚖️ Vérification équilibre...")
             get_balance_data(session)
             
-            time.sleep(0.5)
+            # Pause de 4 secondes avec compte à rebours
+            print(f"   ⏱️ Scan position {position}...")
+            for countdown in range(4, 0, -1):
+                print(f"   ⏳ Analyse: {countdown}s restantes", end="\r")
+                time.sleep(1.0)
+            print(f"   ✅ Position {position} analysée                    ")
+        
+        print("\n🎯 Retour en position centrale...")
+        motion_service.setAngles("HeadYaw", 0.0, 0.2)
+        time.sleep(1.5)
         
         print("✅ === FIN DU SCAN HORIZONTAL ===")
         
@@ -234,7 +260,9 @@ def scan_head_horizontal(session, steps=5):
         print(f"❌ Erreur lors du scan horizontal: {e}")
 
 def scan_head_vertical(session, steps=5):
-    """Scan vertical de la tête selon les limites NAOqi"""
+    """Scan vertical de la tête selon les limites NAOqi
+    Temps entre chaque cran: 4 secondes
+    """
     try:
         motion_service = session.service("ALMotion")
         
@@ -245,7 +273,8 @@ def scan_head_vertical(session, steps=5):
         pitch_min, pitch_max = -0.6720, 0.5149  # Limites réelles NAO (-38.5° à +29.5°)
         pitch_step = (pitch_max - pitch_min) / (steps - 1)
         
-        print(f"   Amplitude: {pitch_min*180/math.pi:.1f}° à {pitch_max*180/math.pi:.1f}° en {steps} étapes")
+        print(f"   📊 Amplitude: {pitch_min*180/math.pi:.1f}° à {pitch_max*180/math.pi:.1f}° en {steps} étapes")
+        print(f"   ⏱️ Temps par cran: 4 secondes")
         
         for i in range(steps):
             pitch_angle = pitch_min + (i * pitch_step)
@@ -260,16 +289,27 @@ def scan_head_vertical(session, steps=5):
             else:
                 position = f"Position {i+1}"
             
-            print(f"⬆️ Scan vertical tête: {position}")
+            print(f"\n⬆️ Cran {i+1}/{steps}: {position}")
+            print(f"   📐 Angle: {pitch_angle:.2f} rad ({pitch_angle*180/math.pi:.1f}°)")
             
             # Mouvement de la tête
-            motion_service.setAngles("HeadPitch", pitch_angle, 0.2)
-            time.sleep(1.0)
+            motion_service.setAngles("HeadPitch", pitch_angle, 0.15)  # Plus lent
+            time.sleep(1.5)  # Temps de stabilisation
             
             # Log équilibre
+            print(f"   ⚖️ Vérification équilibre...")
             get_balance_data(session)
             
-            time.sleep(0.5)
+            # Pause de 4 secondes avec compte à rebours
+            print(f"   ⏱️ Scan position {position}...")
+            for countdown in range(4, 0, -1):
+                print(f"   ⏳ Analyse: {countdown}s restantes", end="\r")
+                time.sleep(1.0)
+            print(f"   ✅ Position {position} analysée                    ")
+        
+        print("\n🎯 Retour en position centrale...")
+        motion_service.setAngles("HeadPitch", 0.0, 0.2)
+        time.sleep(1.5)
         
         print("✅ === FIN DU SCAN VERTICAL DE LA TÊTE ===")
         
