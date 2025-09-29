@@ -1,0 +1,236 @@
+#! /usr/bin/env python
+# -*- encoding: UTF-8 -*-
+
+# Virtual Camera NAO - Version Windows
+# Affiche la caméra du robot NAO dans une fenêtre OpenCV
+# Compatible Windows sans v4l2loopback
+
+import argparse
+import sys
+import time
+import cv2
+import numpy as np
+
+# Import conditionnel pour mode démo
+try:
+    import qi
+    QI_AVAILABLE = True
+except ImportError:
+    QI_AVAILABLE = False
+    print("⚠️ Module 'qi' non disponible - Mode démo activé")
+
+class MockVideoService:
+    """Service vidéo simulé pour les tests"""
+    def __init__(self):
+        self.subscribed = False
+        self.frame_count = 0
+    
+    def subscribeCamera(self, name_id, camera_index, resolution, color_space, fps):
+        self.subscribed = True
+        print(f"[DEMO] Abonnement caméra simulée (index: {camera_index}, résolution: {resolution})")
+        return "_demo_cam"
+    
+    def getImageRemote(self, name_id):
+        if not self.subscribed:
+            return None
+            
+        # Génération d'une image de test colorée
+        self.frame_count += 1
+        width, height = 640, 480
+        
+        # Création d'une image de test avec un motif qui change
+        img = np.zeros((height, width, 3), dtype=np.uint8)
+        
+        # Gradient de couleur qui change avec le temps
+        for y in range(height):
+            for x in range(width):
+                r = int((x + self.frame_count) % 255)
+                g = int((y + self.frame_count // 2) % 255)
+                b = int((x + y + self.frame_count // 4) % 255)
+                img[y, x] = [r, g, b]
+        
+        # Ajout de texte
+        cv2.putText(img, f"NAO Camera DEMO - Frame {self.frame_count}", 
+                   (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 
+                   1, (255, 255, 255), 2)
+        
+        cv2.putText(img, f"IP: 172.16.1.164 (simulee)", 
+                   (10, 70), cv2.FONT_HERSHEY_SIMPLEX, 
+                   0.7, (255, 255, 255), 2)
+        
+        time.sleep(1/15)  # Simuler 15 FPS
+        
+        # Format compatible avec le code NAO
+        return (width, height, 3, 0, 0, 0, img.tobytes())
+    
+    def unsubscribe(self, name_id):
+        self.subscribed = False
+        print(f"[DEMO] Désabonnement caméra: {name_id}")
+
+class MockSession:
+    """Session simulée pour les tests"""
+    def service(self, service_name):
+        if service_name == "ALVideoDevice":
+            return MockVideoService()
+        return None
+
+def main(session):
+    """Fonction principale d'affichage de la caméra NAO"""
+    
+    if QI_AVAILABLE:
+        video_service = session.service("ALVideoDevice")
+        print("🔗 Connexion au service vidéo NAO...")
+    else:
+        print("🎮 Mode DEMO - Simulation de caméra NAO")
+        video_service = MockVideoService()
+    
+    # Paramètres de la caméra
+    resolution = 2  # VGA (640x480)
+    color_space = 11  # RGB
+    fps = 15
+    camera_index = 1  # Utiliser 0 ou 1 selon la caméra qui fonctionne
+    
+    print(f"📷 Configuration caméra:")
+    print(f"   - Résolution: VGA (640x480)")
+    print(f"   - Espace couleur: RGB")
+    print(f"   - FPS: {fps}")
+    print(f"   - Index caméra: {camera_index}")
+    
+    # Abonnement à la caméra
+    name_id = ""
+    name_id = video_service.subscribeCamera(name_id, camera_index, resolution, color_space, fps)
+    print(f"✅ Abonné à la caméra: {name_id}")
+    
+    # Statistiques
+    frame_count = 0
+    start_time = time.time()
+    last_fps_time = start_time
+    
+    print("\n🎬 DÉMARRAGE DU FLUX VIDÉO")
+    print("=" * 50)
+    print("📺 Fenêtre OpenCV: 'NAO Virtual Camera'")
+    print("⌨️  Appuyez sur 'q' pour quitter")
+    print("⌨️  Appuyez sur 's' pour prendre une capture")
+    print("=" * 50)
+    
+    try:
+        while True:
+            # Récupération de l'image
+            image = video_service.getImageRemote(name_id)
+            if image is None:
+                print("⚠️ Pas d'image reçue")
+                time.sleep(0.1)
+                continue
+            
+            # Extraction des données image
+            width, height = image[0], image[1]
+            array = image[6]
+            
+            if QI_AVAILABLE:
+                # Format NAO réel
+                img = np.frombuffer(array, dtype=np.uint8).reshape((height, width, 3))
+            else:
+                # Format démo
+                img = np.frombuffer(array, dtype=np.uint8).reshape((height, width, 3))
+            
+            # Conversion RGB vers BGR pour OpenCV
+            img_bgr = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+            
+            # Ajout d'informations sur l'image
+            frame_count += 1
+            current_time = time.time()
+            
+            # Calcul FPS
+            if current_time - last_fps_time >= 1.0:
+                fps_actual = frame_count / (current_time - start_time)
+                last_fps_time = current_time
+                
+            # Overlay d'informations
+            info_text = f"Frame: {frame_count} | Res: {width}x{height}"
+            cv2.putText(img_bgr, info_text, 
+                       (10, height - 60), cv2.FONT_HERSHEY_SIMPLEX, 
+                       0.6, (0, 255, 0), 2)
+            
+            if QI_AVAILABLE:
+                status_text = f"NAO Camera - LIVE"
+                cv2.putText(img_bgr, status_text, 
+                           (10, height - 30), cv2.FONT_HERSHEY_SIMPLEX, 
+                           0.6, (0, 255, 0), 2)
+            else:
+                status_text = f"NAO Camera - DEMO MODE"
+                cv2.putText(img_bgr, status_text, 
+                           (10, height - 30), cv2.FONT_HERSHEY_SIMPLEX, 
+                           0.6, (0, 255, 255), 2)
+            
+            # Affichage de l'image
+            cv2.imshow("NAO Virtual Camera", img_bgr)
+            
+            # Gestion des touches
+            key = cv2.waitKey(1) & 0xFF
+            if key == ord('q'):
+                print("🛑 Arrêt demandé par l'utilisateur")
+                break
+            elif key == ord('s'):
+                # Sauvegarde d'une capture
+                filename = f"nao_capture_{int(time.time())}.jpg"
+                cv2.imwrite(filename, img_bgr)
+                print(f"📸 Capture sauvée: {filename}")
+                
+    except KeyboardInterrupt:
+        print("\n🛑 Arrêt demandé (Ctrl+C)")
+    except Exception as e:
+        print(f"❌ Erreur: {e}")
+    finally:
+        print("\n🔧 Libération des ressources...")
+        try:
+            video_service.unsubscribe(name_id)
+            print("✅ Désabonnement réussi")
+        except Exception as e:
+            print(f"⚠️ Erreur lors du désabonnement: {e}")
+        
+        cv2.destroyAllWindows()
+        
+        # Statistiques finales
+        total_time = time.time() - start_time
+        avg_fps = frame_count / total_time if total_time > 0 else 0
+        print(f"\n📊 STATISTIQUES:")
+        print(f"   - Frames total: {frame_count}")
+        print(f"   - Durée: {total_time:.1f}s")
+        print(f"   - FPS moyen: {avg_fps:.1f}")
+        print("🏁 Fin du flux vidéo")
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Virtual Camera NAO - Windows Version")
+    parser.add_argument("--ip", type=str, default="172.16.1.164",
+                        help="Robot IP address. Default: 172.16.1.164")
+    parser.add_argument("--port", type=int, default=9559,
+                        help="Naoqi port number")
+
+    args = parser.parse_args()
+    
+    print("\n" + "=" * 60)
+    print("📷 NAO VIRTUAL CAMERA - VERSION WINDOWS")
+    print("=" * 60)
+    print(f"🔗 Connexion à {args.ip}:{args.port}")
+    
+    if QI_AVAILABLE:
+        # Mode robot réel
+        session = qi.Session()
+        try:
+            session.connect("tcp://" + args.ip + ":" + str(args.port))
+            print("✅ Connexion réussie au robot NAO!")
+            main(session)
+        except RuntimeError as e:
+            print(f"❌ Impossible de se connecter: {e}")
+            print("💡 Vérifiez que:")
+            print("   - Le robot NAO est allumé")
+            print("   - Vous êtes sur le même réseau")
+            print("   - L'adresse IP est correcte")
+            print("\n🎮 Passage en mode DÉMO...")
+            session = MockSession()
+            main(session)
+    else:
+        # Mode démo
+        print("🎮 Mode DÉMO - Simulation de caméra NAO")
+        session = MockSession()
+        main(session)
