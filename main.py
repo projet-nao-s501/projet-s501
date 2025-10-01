@@ -12,6 +12,7 @@ import argparse
 import sys
 import cv2
 import numpy as np
+import test1
 # from projet_s501.app.scripts import * : paquage avec le code à developper 
 
 from keras.models import load_model  # TensorFlow is required for Keras to work
@@ -49,6 +50,10 @@ def main(session):
     # print("Subscribed to camera:", name_id)
 
     while True:
+        # session.service("ALSpeechRecognition").subscribe("Test_ASR")
+        # session.service("ALSpeechRecognition").unsubscribe("Test_ASR")
+        # break
+        test1.run_asr(session)
         # image = video_service.getImageRemote(name_id)
         # if image is None:
         #     print("No image.")
@@ -62,7 +67,13 @@ def main(session):
         # cv2.imshow("Robot Camera", img2)
         
         # img = cv2.resize(img, (224, 224), interpolation=cv2.INTER_AREA)
+        # motion_service  = session.service("ALMotion")
 
+        # # Wake up robot
+        # motion_service.wakeUp()
+
+        # posture_service = session.service("ALRobotPosture")
+        # posture_service.goToPosture("StandInit", 1.0)
 
         # # Make the image a numpy array and reshape it to the models input shape.
         # img = np.asarray(img, dtype=np.float32).reshape(1, 224, 224, 3)
@@ -81,13 +92,13 @@ def main(session):
         # print("Confidence Score:", str(np.round(confidence_score * 100))[:-2], "%")
 
         # # Mise en place motion_service
-        motion_service  = session.service("ALMotion")
+        # motion_service  = session.service("ALMotion")
 
-        # Wake up robot
-        motion_service.wakeUp()
+        # # Wake up robot
+        # motion_service.wakeUp()
 
-        posture_service = session.service("ALRobotPosture")
-        posture_service.goToPosture("StandInit", 1.0)
+        # posture_service = session.service("ALRobotPosture")
+        # posture_service.goToPosture("StandInit", 1.0)
 
 
         # # Marcher devant 
