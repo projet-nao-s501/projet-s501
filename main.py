@@ -4,8 +4,6 @@
 import qi
 import argparse
 import sys
-import cv2
-import numpy as np
 from projet_s501.app.scripts.meca_module.sonar_detection import sonarDetection 
 
 from keras.models import load_model  # TensorFlow is required for Keras to work
@@ -28,7 +26,7 @@ if __name__ == "__main__":
     session = qi.Session()
     try:
         session.connect("tcp://" + args.ip + ":" + str(args.port))
-    except RuntimeError:
+    except RuntimeError as e:
         print ("Can't connect to Naoqi at ip \"" + args.ip + "\" on port " + str(args.port) +".\n"
                "Please check your script arguments. Run with -h option for help.")
         sys.exit(1)

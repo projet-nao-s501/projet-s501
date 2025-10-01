@@ -1,5 +1,3 @@
-import qi
-
 def sonarDetection(session) :
     """
     résumé : interprétation de la détection du sonar
