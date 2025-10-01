@@ -28,6 +28,21 @@
             "program": "${workspaceFolder}/virtual_cam.py",
             "console": "integratedTerminal",
             "args": ["--ip", "172.16.1.164", "--port", "9559"]
+        },
+        {
+            "name": "NAO Camera Simple (Recommandé)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/virtual_cam_simple.py",
+            "console": "integratedTerminal",
+            "args": ["--ip", "172.16.1.164", "--port", "9559"]
+        },
+        {
+            "name": "NAO Menu Simple - Projet S501",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/nao_menu_simple.py",
+            "console": "integratedTerminal"
         }
     ]
 }
