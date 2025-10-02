@@ -50,7 +50,7 @@ Returns:
     vrai si meterAlertValue est atteinte
     
     """
-    return meterAlertValue <= rightSensor and meterAlertValue <= leftSensor
+    return meterAlertValue >= rightSensor and meterAlertValue >= leftSensor
 
 if __name__ == '__main__' : pass
     
