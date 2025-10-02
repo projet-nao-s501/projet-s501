@@ -1,5 +1,6 @@
 import time 
 from typing import Any
+from ..utils.subricber import Subriber
 
 def SonarDetection(session : Any) -> None:
     """
@@ -53,4 +54,24 @@ Returns:
     return meterAlertValue >= rightSensor and meterAlertValue >= leftSensor
 
 if __name__ == '__main__' : pass
+
+def AUnObjetDansSonChamp(session : Any) :
+    """
+    Détecte si le robot n'a pas un objet dans le champ du sonnar
+    
+    Args:
+        session: la session en cours avec le robot
+    """
+    isRaise = False
+    def isRaised(value) :
+        """
+    Est appelé si rien est  n'est détecté
+    
+    Args:
+        value: valeur renvoyé par l'appeleur de l'évenement
+        """
+        global isRaise
+        isRaise = True
+    for event in ["SonarRightDetected", "SonarLeftDetected"] : Subriber(session,isRaised, event)
+    return isRaise
     
