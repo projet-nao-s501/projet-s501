@@ -108,9 +108,9 @@ def scan_vertical_4_crans(session):
     print("\n=== Scan Vertical 4 Crans ===")
     
     if DEMO_MODE:
-        positions = ["Pieds", "Genoux", "Torse", "Tête"]
+        positions = ["Genoux", "Torse", "Poitrine", "Tête"]
         for i, pos in enumerate(positions, 1):
-            print(f"DÉMO: Cran {i}/4 - {pos}")
+            print(f"DÉMO: Cran {i}/4 - {pos} (position plus haute)")
             time.sleep(4)
         return
     
@@ -120,13 +120,13 @@ def scan_vertical_4_crans(session):
         # Activer le contrôle de la tête
         motion.setStiffnesses("Head", 1.0)
         
-        # 4 positions de scan vertical
+        # 4 positions de scan vertical - commencé plus haut
         # Pitch: négatif = vers le bas, positif = vers le haut
         positions = [
-            ("Pieds", 0.45),      # Très bas
-            ("Genoux", 0.15),     # Bas
-            ("Torse", -0.15),     # Centre/légèrement haut
-            ("Tête", -0.38)       # Haut
+            ("Genoux", 0.25),     # Bas (plus haut qu'avant)
+            ("Torse", -0.05),     # Centre
+            ("Poitrine", -0.25),  # Haut
+            ("Tête", -0.45)       # Très haut
         ]
         
         print("Début du scan vertical en 4 crans...")
@@ -144,47 +144,52 @@ def scan_vertical_4_crans(session):
 
 
 def scan_vertical_avec_bras(session):
-    """5. Scan vertical avec bras - Les bras montent vers l'avant pour équilibrer"""
-    print("\n=== Scan Vertical avec Compensation Bras ===")
+    """5. Scan vertical avec bras - Les bras montent vers l'avant et le buste recule pour équilibrer"""
+    print("\n=== Scan Vertical avec Compensation Buste + Bras ===")
     
     if DEMO_MODE:
-        positions = ["Pieds", "Genoux", "Torse", "Tête (bras en avant)"]
+        positions = ["Genoux", "Torse", "Poitrine", "Tête (bras avant + buste arrière)"]
         for i, pos in enumerate(positions, 1):
             print(f"DÉMO: Cran {i}/4 - {pos}")
             time.sleep(4)
-        print("DÉMO: Bras reviennent en position normale")
+        print("DÉMO: Bras et buste reviennent en position normale")
         return
     
     try:
         motion = session.service("ALMotion")
         
-        # Activer le contrôle de la tête et des bras
-        motion.setStiffnesses(["Head", "LArm", "RArm"], 1.0)
+        # Activer le contrôle de la tête, des bras et du buste
+        motion.setStiffnesses(["Head", "LArm", "RArm", "Body"], 1.0)
         
         # Positions des bras vers l'avant pour compensation
-        # ShoulderPitch: angle d'épaule (+ = vers l'avant/bas, - = vers l'arrière/haut)
-        # ShoulderRoll: écartement latéral
         arm_forward = {
-            "LShoulderPitch": 1.0,   # Bras gauche vers l'avant
+            "LShoulderPitch": 0.8,   # Bras gauche vers l'avant (moins agressif)
             "LShoulderRoll": 0.15,   # Légèrement écarté
-            "RShoulderPitch": 1.0,   # Bras droit vers l'avant
+            "RShoulderPitch": 0.8,   # Bras droit vers l'avant
             "RShoulderRoll": -0.15   # Légèrement écarté
         }
         
-        # 4 positions de scan vertical
+        # 4 positions de scan vertical - commencé plus haut
         positions = [
-            ("Pieds", 0.45),
-            ("Genoux", 0.15),
-            ("Torse", -0.15),
-            ("Tête", -0.38)
+            ("Genoux", 0.25),     # Bas (plus haut qu'avant)
+            ("Torse", -0.05),     # Centre
+            ("Poitrine", -0.25),  # Haut
+            ("Tête", -0.45)       # Très haut
         ]
         
-        print("Début du scan vertical avec compensation des bras...")
+        print("Début du scan vertical avec compensation buste + bras...")
         
-        # Mettre les bras vers l'avant pour la position haute
-        print("  → Bras vers l'avant pour compensation...")
+        # COMPENSATION: Bras vers l'avant + buste vers l'arrière
+        print("  → Compensation: bras avant + buste arrière...")
+        
+        # Bras vers l'avant
         for joint, angle in arm_forward.items():
             motion.setAngles(joint, angle, 0.15)
+        
+        # Buste vers l'arrière pour compenser (HipPitch = flexion hanche)
+        # HipPitch positif = buste vers l'arrière
+        motion.setAngles(["LHipPitch", "RHipPitch"], [0.15, 0.15], 0.15)
+        
         time.sleep(2)
         
         # Scan avec les positions
@@ -193,16 +198,21 @@ def scan_vertical_avec_bras(session):
             motion.setAngles("HeadPitch", pitch, 0.15)
             time.sleep(4)  # 4 secondes entre chaque cran
         
-        # Remettre les bras le long du corps
-        print("  → Bras en position normale...")
+        # RETOUR À LA NORMALE
+        print("  → Retour à la position normale...")
+        
+        # Buste en position normale
+        motion.setAngles(["LHipPitch", "RHipPitch"], [0.0, 0.0], 0.15)
+        
+        # Bras le long du corps
         motion.setAngles(["LShoulderPitch", "RShoulderPitch"], [1.5, 1.5], 0.15)
         motion.setAngles(["LShoulderRoll", "RShoulderRoll"], [0.1, -0.1], 0.15)
         
-        # Retour au centre de la tête
+        # Tête au centre
         motion.setAngles("HeadPitch", 0.0, 0.15)
-        time.sleep(1)
+        time.sleep(2)
         
-        print("✓ Scan vertical avec bras terminé")
+        print("✓ Scan vertical avec compensation terminé")
         
     except Exception as e:
         print(f"✗ Erreur: {e}")

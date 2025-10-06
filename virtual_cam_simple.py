@@ -174,7 +174,10 @@ def main(session):
         print("\n🛑 Arrêt demandé")
     finally:
         video_service.unsubscribe(name_id)
-        cv2.destroyAllWindows()
+        try:
+            cv2.destroyAllWindows()
+        except:
+            pass  # Ignorer les erreurs de fermeture des fenêtres
         print(f"🏁 Arrêt - {frame_count} frames affichées")
 
 if __name__ == "__main__":
