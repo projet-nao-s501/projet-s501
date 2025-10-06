@@ -5,7 +5,7 @@ import qi
 import argparse
 import sys
 from typing import Any
-from projet_s501.app.scripts.meca_module.sonar_detection import SonarDetection, AUnObjetDansSonChamp
+from projet_s501.app.scripts.meca_module.sonar_detection import SonarDetection
 
 def main(session : Any) -> None:
     """
@@ -17,8 +17,6 @@ Args:
 
     while True:
         SonarDetection(session) ## votre fonction ici
-        aRienDansSonChamp = AUnObjetDansSonChamp(session)
-        if(not(aRienDansSonChamp)) : print("le champ est libre")
 
 
 if __name__ == "__main__":
