@@ -33,24 +33,44 @@ result_black1= cv2.bitwise_and(image1, image1, mask=masked1)
 #cv2.waitKey(0)
 #cv2.destroyAllWindows()
 
-#----------------------------------------
+#----------------------------------------------Acces camera ---------------------------------------------
+
 # Test de la caméra avec opencv pour la detection de couleur 
 
 # Ouvrir la webcam (0 = webcam par défaut, 1 = autre caméra si branchée)
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(0,cv2.CAP_DSHOW)
 
-# ici ret c'est pour retourner un booléan qui va dire si la capture de l'image est bien 
+
+# ici ret c'est pour retiourner un booléan qui va dire si la capture de l'image est bien 
 # ici frame est l'image capturer par la webcam
 while True:
     ret, frame = cap.read() # Récupère une image
     if not ret:
+        print("Impossible de lire l'image depuis la webcam")
         break
-     # Affiche l'image
-    cv2.imshow("Webcam", frame)
 
-    # Quitter avec 'q'
+    # tab = [teinte, saturation, luminosité]
+    # 1er intervalle : rouge de 0 à 10
+    lower = np.array([0, 0, 200])    
+    upper = np.array([180, 30, 255])
+
+
+    # convertir l'image en HVG
+    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+    
+    # Création des deux masques
+    mask = cv2.inRange(hsv, lower, upper)    
+    # Fusion des deux masques
+    mask = mask
+    
+    result_webcam = cv2.bitwise_and(frame,frame,mask=mask)
+    
+    # Affiche l'image
+    cv2.imshow("Webcam de l'ordinateur", result_webcam)
+
+       # Quitter avec 'q'
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 cap.release()
 cv2.destroyAllWindows()
-
+	

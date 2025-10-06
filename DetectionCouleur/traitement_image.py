@@ -4,7 +4,7 @@ import numpy as np
 # numpy array = librairie qui manipule les tableaux.
 
 #charger une image (prend 2 paramètres (le chemin de l'image)/(le mode d'ouverture))
-#img = cv2.imread("images/Pomme_test.jpg",cv2.IMREAD_COLOR)
+img = cv2.imread("images/Pomme_test.jpg",cv2.IMREAD_COLOR)
 img = cv2.imread("images/les_amies.webp",cv2.IMREAD_COLOR)
 
 # pour redéfinir la taille de l'image 
