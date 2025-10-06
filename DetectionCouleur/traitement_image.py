@@ -87,4 +87,11 @@ while True:
     # Affiche l'image
     cv2.imshow("Webcam", frame)
 
+    
+       # Quitter avec 'q'
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+cap.release()
+cv2.destroyAllWindows()
+
 
