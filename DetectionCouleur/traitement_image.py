@@ -71,3 +71,20 @@ cv2.waitKey(0)
 cv2.destroyAllWindows()
 
 
+#----------------------------------------
+# Test de la caméra avec opencv pour la detection de couleur 
+
+# Ouvrir la webcam (0 = webcam par défaut, 1 = autre caméra si branchée)
+cap = cv2.VideoCapture(0)
+
+# ici ret c'est pour retiourner un booléan qui va dire si la capture de l'image est bien 
+# ici frame est l'image capturer par la webcam
+while True:
+    ret, frame = cap.read() # Récupère une image
+    if not ret:
+        break
+    
+    # Affiche l'image
+    cv2.imshow("Webcam", frame)
+
+
