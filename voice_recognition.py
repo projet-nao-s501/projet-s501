@@ -21,9 +21,26 @@ def voice_recognition_sprint1(session):
     memory = session.service("ALMemory")
     tts = session.service("ALTextToSpeech")
     
-    print("=" * 60)
+    try:
+        print("Nettoyage des anciens abonnements ASR...")
+        subscribers = asr.getSubscribersInfo()
+        for subscriber in subscribers:
+            try:
+                asr.unsubscribe(subscriber)
+                print(f"  Désabonné: {subscriber}")
+            except Exception as e:
+                print(f"  Impossible de désabonner {subscriber}: {e}")
+    except Exception as e:
+        print(f"Erreur lors du nettoyage: {e}")
+    
+    # PAUSE explicite du moteur ASR
+    try:
+        asr.pause(True)
+        print("Moteur ASR mis en pause")
+    except Exception as e:
+        print(f"Info: {e}")
+
     print("RECONNAISSANCE VOCALE NAO - SPRINT 1")
-    print("=" * 60)
     
     # Configuration de la langue en français
     asr.setLanguage("French")
