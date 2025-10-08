@@ -4,17 +4,19 @@
 import qi
 import argparse
 import sys
-import cv2
-import numpy as np
-from projet_s501.app.scripts.meca_module.sonar_detection import sonarDetection 
+from typing import Any
+from projet_s501.app.scripts.meca_module.sonar_detection import SonarDetection
 
-from keras.models import load_model  # TensorFlow is required for Keras to work
+def main(session : Any) -> None:
+    """
+Fonction principal du paquage
 
-
-def main(session):
+Args:
+    session: La session en cours avec le robot
+    """
 
     while True:
-        sonarDetection(session)
+        SonarDetection(session) ## votre fonction ici
 
 
 if __name__ == "__main__":
@@ -29,7 +31,7 @@ if __name__ == "__main__":
     try:
         session.connect("tcp://" + args.ip + ":" + str(args.port))
         main(session)
-    except RuntimeError:
+    except RuntimeError as e:
         print ("Can't connect to Naoqi at ip \"" + args.ip + "\" on port " + str(args.port) +".\n"
                "Please check your script arguments. Run with -h option for help.")
         sys.exit(1)

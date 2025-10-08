@@ -1,5 +1,20 @@
 # Projet nao-s501
 
+**Sommaire**
+
+- [Projet nao-s501](#projet-nao-s501)
+  - [Installation](#installation)
+    - [Docker](#docker)
+    - [OS Linux](#os-linux)
+  - [Démarrez le script](#démarrez-le-script)
+    - [Lancement Docker](#lancement-docker)
+      - [Windows](#windows)
+      - [Linux/MacOs](#linuxmacos)
+    - [Lancer le projet](#lancer-le-projet)
+  - [Organisation du git](#organisation-du-git)
+
+
+
 ## Installation
 
 ### Docker

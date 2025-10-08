@@ -1,39 +1,56 @@
-import qi
 import time 
-def sonarDetection(session) :
+from typing import Any
+from ..utils.subricber import Subriber
+
+def SonarDetection(session : Any) -> None:
     """
-    résumé : interprétation de la détection du sonar
-    paramètre :
-        - session : session de connexion avec le robot
+Interprétation de la détection du sonar.
+
+Args:
+    session: une session avec le robot
     """
     motion_service = session.service("ALMotion")
     position = session.service("ALRobotPosture")
     sonar_service = session.service("ALSonar")
     memory_service = session.service("ALMemory")
 
-    # Subscribe to sonars, this will launch sonars (at hardware level)
-    # and start data acquisition.
     sonar_service.subscribe("myApplication")
 
-    # Now you can retrieve sonar data from ALMemory.
-    # Get sonar left first echo (distance in meters to the first obstacle).
+    # Important de le lever car le sonnar renverra des données que dans ce cas
     motion_service.rest()
-
     time.sleep(2)
-
     position.goToPosture("StandInit", 1.0)
 
-    time.sleep(1)
-    for i in ["",1,2,3,4,5,6,7,8,9] :
-        try :
-            leftSensor = memory_service.getData(f"Device/SubDeviceList/US/Left/Sensor/Value{i}")
+    time.sleep(1) # laisser le temps au robot de lever
+    try :
+        leftSensor = memory_service.getData("Device/SubDeviceList/US/Left/Sensor/Value") # TODO : tester Value1 jusqu'à 9 pour voir si ces capteurs marchent
+        rightSensor = memory_service.getData("Device/SubDeviceList/US/Right/Sensor/Value")
+        meterAlertValue = 0.4
+        isDepassed = meterTrak(meterAlertValue,rightSensor,leftSensor)
+        
+        if(isDepassed) :
+            # TODO : la future fonction qui gèrera le dépassement de la frontière
+            print(f"La frontiere de {meterAlertValue} est franchi")
 
-        # Same thing for right.
-            rightSensor = memory_service.getData(f"Device/SubDeviceList/US/Right/Sensor/Value{i}")
+    except Exception as e :
+        print(e)
+        return
 
-            print(f"Value{i} left sensor {leftSensor} ; right sensor {rightSensor}")
-        except Exception as e :
-             continue
-
-    # Unsubscribe from sonars, this will stop sonars (at hardware level)
     sonar_service.unsubscribe("myApplication")
+
+def meterTrak(meterAlertValue : int, rightSensor : float, leftSensor : float) -> bool :
+    """
+S'assure que le robot n'atteint pas la distance donnée par meterAlertValue
+
+Args:
+    meterAlertValue: la distance avec un objet à ne pas atteindre
+    rightSensor: donnée du sonar droit du robot
+    leftSensor: donnée du sonar gauche du robot
+    
+Returns:
+    vrai si meterAlertValue est atteinte
+    
+    """
+    return meterAlertValue >= rightSensor and meterAlertValue >= leftSensor
+
+if __name__ == '__main__' : pass
