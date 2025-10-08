@@ -53,7 +53,7 @@ def voice_recognition_sprint1(session):
         "projet", 
         "merci",
         "moi",
-        "junior",
+        "qui est junior ?",
         "au revoir"
     ]
     
@@ -72,7 +72,7 @@ def voice_recognition_sprint1(session):
         "projet": "L'équipe composée de 10 membres doit me programmer afin que je puisse identifier un individu en fonction des caractéristiques qui me seront fournies. J'espère que j'ai été assez clair Junior ?",
         "merci": "Tu as encore besoin d'une information ?",
         "moi": "Lamaro Salif Junior, jeune homme portant des lunettes et qui se trouve actuellement trop proche de mon oreille. Peux-tu te décaler s'il te plait ?",
-        "junior": "Lamaro Salif Junior, jeune homme portant des lunettes et qui se trouve actuellement trop proche de mon oreille. Peux-tu te décaler s'il te plait ?",
+        "qui est junior ?": "Lamaro Salif Junior, jeune homme portant des lunettes et qui se trouve actuellement trop proche de mon oreille. Peux-tu te décaler s'il te plait ?",
         "au revoir": "Bonne journée Junior"
     }
     
