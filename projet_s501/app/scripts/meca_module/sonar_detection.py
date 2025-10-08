@@ -31,6 +31,7 @@ Args:
         if(isDepassed) :
             # TODO : la future fonction qui gèrera le dépassement de la frontière
             print(f"La frontiere de {meterAlertValue} est franchi")
+            print(f"détection à gauche : {leftSensor}; détection à droite {rightSensor}")
 
     except Exception as e :
         print(e)

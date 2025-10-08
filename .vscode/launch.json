@@ -11,7 +11,7 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
-            "args": ["--ip", "host.docker.internal", "--port", "60324"]
+            "args": ["--ip", "172.16.1.163", "--port", "9559"]
 
         }
     ]
