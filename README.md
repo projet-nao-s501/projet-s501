@@ -61,8 +61,11 @@ Quelques commandes supplémentaires sont à exécutez en fonction de votre OS d'
 
 ```powershell
 naoqi-bin.exe --broker-ip 0.0.0.0 --broker-port 60323
+
 # permet au simulateur de recevoir des connexions depuis l'extérieur
 ```
+
+Pour le paramètre --ip, il  faudra rentrer : host.docker.internal
 
 - Remarque : n'ayez pas chorégraphe de lancer
 
@@ -88,7 +91,7 @@ source venv/bin/activate
 - Executez le fichier test
 
 ```bash
-python main.py --ip <adresse IP> --port <numéro de port>
+python main.py --ip `<adresse IP>` --port `<numéro de port>`
 ```
 
 ## Organisation du git
