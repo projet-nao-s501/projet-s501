@@ -14,8 +14,11 @@ import argparse
 import sys
 import time
 import numpy as np
+import test1
 import cv2
-# from keras.models import load_model  # Décommenter si utilisation modèle IA
+# from projet_s501.app.scripts import * : paquage avec le code à developper 
+
+from keras.models import load_model  # TensorFlow is required for Keras to work
 
 
 # =============================
@@ -181,7 +184,6 @@ def main(session):
     posture_service.goToPosture("StandInit", 1.0)
 
     print("Robot prêt. Appuyez sur Ctrl+C pour arrêter.")
-
     try:
         while True:
             # Exemple simple : déplacement vers l'avant avec moveToward
@@ -190,7 +192,7 @@ def main(session):
             motion_service.stopMove()
 
             time.sleep(2)  # Pause entre les commandes
-
+            test1.run_asr(session)
             # Pour test, on boucle une seule fois
             break
 
@@ -201,7 +203,6 @@ def main(session):
     # video_service.unsubscribe(name_id)  # Décommenter si utilisation caméra
     # cv2.destroyAllWindows()             # Décommenter si utilisation OpenCV
     motion_service.rest()
-
 
 # ===========================
 # === POINT D'ENTREE SCRIPT ===
