@@ -31,6 +31,8 @@ docker run -it --name nao-s501 s501-nao bash
   - cmake
 - utiliser python 3.11.2 précisément pour que la version de tensorflow soit valable
 
+- executez le script `script.sh` pour pouvoir installer qi sur votre machine
+
 - cloner le projet :
 
 ```bash
