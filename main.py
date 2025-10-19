@@ -1,14 +1,5 @@
 # -*- encoding: UTF-8 -*-
 
-"""
-Script de contrôle de déplacement pour robot NAO.
-Permet de commander le robot en déplacement avec gestion d'erreur de position.
-Possibilité d'ajouter la capture vidéo et modèle IA (commenté pour l'instant).
-
-Packages requis :
-  pip install tensorflow==2.12.1 numpy==1.23.5 opencv-python==4.9.0.80
-"""
-
 import qi
 import argparse
 import sys
