@@ -131,33 +131,4 @@ def test_text_to_speech(session):
 
 
 if __name__ == "__main__":
-    import argparse
-    import sys
-    
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--ip", type=str, default="127.0.0.1",
-                        help="Adresse IP du robot NAO")
-    parser.add_argument("--port", type=int, default=9559,
-                        help="Port NAOqi")
-    parser.add_argument("--test", action="store_true",
-                        help="Lancer uniquement le test TTS")
-    
-    args = parser.parse_args()
-    
-    # Connexion à NAO
-    session = qi.Session()
-    try:
-        session.connect("tcp://" + args.ip + ":" + str(args.port))
-        print(f" Connecté à NAO sur {args.ip}:{args.port}\n")
-    except RuntimeError:
-        print(f" Impossible de se connecter à NAO sur {args.ip}:{args.port}")
-        print("Vérifiez que:")
-        print("  - Le simulateur NAOqi est lancé (si en local)")
-        print("  - L'adresse IP et le port sont corrects")
-        sys.exit(1)
-    
-    # Lancer le test ou la reconnaissance vocale
-    if args.test:
-        test_text_to_speech(session)
-    else:
-        voice_recognition_sprint1(session)
+    pass
