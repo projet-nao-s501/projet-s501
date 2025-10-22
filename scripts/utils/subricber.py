@@ -10,7 +10,8 @@ def Subscriber(session : Any, onEvent : Callable[[Any], None], eventName : str) 
     
     Args:
         session: Session en cours avec le robot
-        onEvent: fonction appelé si l'evenement se produit
+        onEvent: fonction appelé
+        si l'evenement se produit
         eventName: nom de l'evenment auquel la fonction s'abonne 
     """
     memoire = session.service("ALMemory")
