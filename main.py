@@ -5,6 +5,7 @@ import argparse
 import sys
 from scripts.meca_module.voice_recognition import test_text_to_speech, voice_recognition_sprint1  # TensorFlow is required for Keras to work
 from scripts.meca_module.RobotMovement import marcheRobot
+from scripts.meca_module.accessCamera import accessCamera
 
 def main(session) :
     accessCamera()
