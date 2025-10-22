@@ -1,5 +1,6 @@
 import numpy as np
 import time
+from .sonar_detection import SonarDetection
 
 class RobotMovement:
     def __init__(self):
@@ -55,7 +56,7 @@ class RobotMovement:
             new_theta = self.theta + other.theta
             return RobotMovement.Pose2D(new_pos[0], new_pos[1], new_theta)
 
-        def diff(self, other):
+        def __sub__(self, other):
             """
             Différence entre deux poses : self - other.
             """
@@ -114,7 +115,7 @@ class RobotMovement:
         real_end_position = self.Pose2D(robot_pos_end[0], robot_pos_end[1], robot_pos_end[2])
 
         # Calcul de l'erreur entre attendu et réel
-        position_error = real_end_position.diff(expected_end_position)
+        position_error = real_end_position - expected_end_position
         position_error.theta = self.modulo2PI(position_error.theta)
 
         # Vérification de l'erreur pour confirmer l'arrivée ou l'arrêt prématuré
@@ -149,7 +150,6 @@ def marcheRobot(session):
     # Initialisation des services
     motion_service = session.service("ALMotion")
     posture_service = session.service("ALRobotPosture")
-    # video_service = session.service("ALVideoDevice")  # Décommenter si besoin vidéo
 
     # Réveil et position initiale debout
     motion_service.wakeUp()
@@ -163,16 +163,19 @@ def marcheRobot(session):
             time.sleep(5)  # Déplacement pendant 5 secondes
             motion_service.stopMove()
 
+            motionAlert = 0.4
+
             time.sleep(2)  # Pause entre les commandes
-            
-            # Pour test, on boucle une seule fois
-            break
+            left, right = SonarDetection(session,motionAlert)
+            if  left != -1 :
+                pass # TODO : décaler légèrement de déplacement du robot, envoyer une donée décrivant la présence d'un robot dans le champs du sonar
+            if  right != -1 :
+                pass # TODO : décaler légèrement de déplacement du robot, envoyer une donée décrivant la présence d'un robot dans le champs du sonar
+                
 
     except KeyboardInterrupt:
         print("Arrêt par l'utilisateur.")
-
-    # Nettoyage et mise en repos
-    # video_service.unsubscribe(name_id)  # Décommenter si utilisation caméra
-    # cv2.destroyAllWindows()             # Décommenter si utilisation OpenCV
+    except Exception as e :
+        print(f"erreur inatendu {e.__cause__}")
     motion_service.rest()
 

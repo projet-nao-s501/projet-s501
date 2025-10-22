@@ -4,7 +4,7 @@ Module permettant de s'abonner et se désaboonner à un événement dans le robo
 
 from typing import Any, Callable
 
-def Subscriber(session : Any, onEvent : Callable[[Any], None], eventName : str) -> None:
+def Subscriber(session : Any, eventName : str, onEvent : Callable[[Any], None] | None = None) -> None:
     """
     S'abonne à l'événement `eventName` du robot
     
@@ -16,7 +16,7 @@ def Subscriber(session : Any, onEvent : Callable[[Any], None], eventName : str) 
     """
     memoire = session.service("ALMemory")
     subriber = memoire.subscriber(eventName)
-    subriber.signal.connect(onEvent) # connect ne reverra rien, il faudra se débrouiller autremen si vous voulez réutiliser la valariable ailleurs
+    if onEvent is not None : subriber.signal.connect(onEvent)
 
 def UnSubscriber(session : Any, enventName : str) -> None:
     """
