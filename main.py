@@ -14,23 +14,15 @@ import time
 import cv2
 import numpy as np
 
-from keras.models import load_model  # TensorFlow is required for Keras to work
-
-
 def main(session):
     video_service = session.service("ALVideoDevice")
     # Camera settings
-    resolution = 2  # VGA (640x480)
+    resolution = 1  # VGA (640x480)
     color_space = 11  # RGB
-    fps = 15
+    fps = 30
     camera_index = 1  # Use 0 or 1 depending on which one works
 
     np.set_printoptions(suppress=True)
-
-    # Load the model
-    model = load_model("keras_model.h5", compile=False)
-    # Load the labels
-    class_names = open("labels.txt", "r").readlines()
 
     subscribers = video_service.getSubscribers()
     print("Abonnements actifs :", subscribers)
@@ -62,23 +54,6 @@ def main(session):
         cv2.imshow("Robot Camera", img2)
         
         img = cv2.resize(img, (224, 224), interpolation=cv2.INTER_AREA)
-
-
-        # Make the image a numpy array and reshape it to the models input shape.
-        img = np.asarray(img, dtype=np.float32).reshape(1, 224, 224, 3)
-
-        # Normalize the image array
-        img = (img / 127.5) - 1
-
-        # Predicts the model
-        prediction = model.predict(img)
-        index = np.argmax(prediction)
-        class_name = class_names[index]
-        confidence_score = prediction[0][index]
-
-        # Print prediction and confidence score
-        print("Class:", class_name[2:], end="")
-        print("Confidence Score:", str(np.round(confidence_score * 100))[:-2], "%")
 
         # # Mise en place motion_service
         # motion_service  = session.service("ALMotion")
