@@ -3,24 +3,11 @@ import time
 from .sonar_detection import SonarDetection
 
 class RobotMovement:
-    def __init__(self):
+    def __init__(self, motion):
         # Seuils d'erreur pour considérer le déplacement réussi
         self.positionErrorThresholdPos = 0.01  # 1 cm
         self.positionErrorThresholdAng = 0.03  # ~1.7 degrés
-        self.motion = None  # Référence au service ALMotion
-
-    def session(self):
-        """
-        Méthode à surcharger pour injecter la session NAOqi.
-        Doit retourner la session active.
-        """
-        raise NotImplementedError("La méthode session() doit être définie pour accéder aux services.")
-
-    def onLoad(self):
-        """
-        Récupère le service ALMotion à partir de la session.
-        """
-        self.motion = self.session().service("ALMotion")
+        self.motion = motion
 
     def onUnload(self):
         """
@@ -159,7 +146,10 @@ def marcheRobot(session):
     try:
         while True:
             # Exemple simple : déplacement vers l'avant avec moveToward
-            motion_service.moveToward(0.5, 0.0, 0.0, [["Frequency", 1.0]])
+            robotMouvement = RobotMovement(motion_service)
+            pos2D = robotMouvement.Pose2D(x=0.5,y=0,theta=0)
+            position = pos2D.toVector()
+            motion_service.moveToward(position[0], position[1], position[2], [["Frequency", 1.0]])
             time.sleep(5)  # Déplacement pendant 5 secondes
             motion_service.stopMove()
 
