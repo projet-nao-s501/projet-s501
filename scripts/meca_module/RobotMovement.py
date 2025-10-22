@@ -158,9 +158,9 @@ def marcheRobot(session):
             time.sleep(2)  # Pause entre les commandes
             left, right = SonarDetection(session,motionAlert)
             if  left != -1 :
-                pass # TODO : décaler légèrement de déplacement du robot, envoyer une donée décrivant la présence d'un robot dans le champs du sonar
+                pass # TODO : décaler le theta de position vers la droite, envoyer une donée décrivant la présence d'un robot dans le champs du sonar
             if  right != -1 :
-                pass # TODO : décaler légèrement de déplacement du robot, envoyer une donée décrivant la présence d'un robot dans le champs du sonar
+                pass # TODO : décaler le theta de position vers la gauche, envoyer une donée décrivant la présence d'un robot dans le champs du sonar
                 
 
     except KeyboardInterrupt:
