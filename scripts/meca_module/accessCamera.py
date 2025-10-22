@@ -2,7 +2,7 @@ import time
 import cv2
 import numpy as np
 
-def accessCamera() :
+def accessCamera(session) :
     video_service = session.service("ALVideoDevice")
     # Camera settings
     resolution = 1  # VGA (640x480)
@@ -36,12 +36,10 @@ def accessCamera() :
 
         width, height = image[0], image[1]
         array = image[6]
-        img = np.frombuffer(array, dtype=np.uint8).reshape((height, width, 3))
 
+        # color image in it (bgr)
         img2 = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
         cv2.imshow("Robot Camera", img2)
-        
-        img = cv2.resize(img, (224, 224), interpolation=cv2.INTER_AREA)
 
         # # Mise en place motion_service
         # motion_service  = session.service("ALMotion")

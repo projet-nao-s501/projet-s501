@@ -8,7 +8,7 @@ from scripts.meca_module.RobotMovement import marcheRobot
 from scripts.meca_module.accessCamera import accessCamera
 
 def main(session) :
-    accessCamera()
+    accessCamera(session)
 
 
 if __name__ == "__main__":
@@ -28,8 +28,9 @@ if __name__ == "__main__":
     except RuntimeError:
         print(f"Impossible de se connecter à NAOqi à l'adresse {args.ip}:{args.port}.")
         sys.exit(1)
-    if args.test:
-        test_text_to_speech(session)
-    else:
-        voice_recognition_sprint1(session)
-    marcheRobot(session)
+    main(session)
+    # if args.test:
+    #     test_text_to_speech(session)
+    # else:
+    #     voice_recognition_sprint1(session)
+    # marcheRobot(session)
