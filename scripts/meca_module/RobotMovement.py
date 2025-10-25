@@ -145,6 +145,7 @@ def marcheRobot(session):
     print("Robot prêt. Appuyez sur Ctrl+C pour arrêter.")
     try:
         while True:
+            motionAlert = 0.4
             left, right = SonarDetection(session,motionAlert)
             robotMouvement = RobotMovement(motion_service)
             pos2D = robotMouvement.Pose2D(x=0.5,y=0,theta=0)
@@ -157,11 +158,10 @@ def marcheRobot(session):
                 motion_service.moveToward(x, y, theta, [["Frequency", 1.0]])
                 time.sleep(5)  # Déplacement pendant 5 secondes
                 motion_service.stopMove()
-                motionAlert = 0.4
 
     except KeyboardInterrupt:
         print("Arrêt par l'utilisateur.")
     except Exception as e :
-        print(f"erreur inatendu {e.__cause__}")
+        print(f"erreur inatendu {e}")
     motion_service.rest()
 
