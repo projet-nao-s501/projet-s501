@@ -16,10 +16,10 @@ def main(session : Any, args : Namespace) -> None :
         args: les arguments passés lors de l'appel du fichier
     
     """
-    # if args.test:
-    #     test_text_to_speech(session)
-    # else:
-    #     voice_recognition_sprint1(session)
+    if args.test:
+        test_text_to_speech(session)
+    else:
+        voice_recognition_sprint1(session)
     marcheRobot(session)
 
 if __name__ == "__main__":
@@ -37,10 +37,14 @@ if __name__ == "__main__":
     try:
         session.connect(f"tcp://{args.ip}:{args.port}")
         main(session, args)
-    except RuntimeError:
-        print(f"Impossible de se connecter à NAOqi à l'adresse {args.ip}:{args.port}.")
-        sys.exit(1)
-    except Exception as e:
-        print(e)
+    except RuntimeError as e:
+        if e.__str__().find("Connect error: 111") != -1 : 
+            print(f"Impossible de se connecter à NAOqi à l'adresse {args.ip}:{args.port}.")
+        else : 
+            print(f"erreur inattendu : {e}") 
+    except KeyboardInterrupt: print("Arrêt par l'utilisateur.")
+    except Exception as e: print(f"erreur inattendu : {e}") 
+    
+    finally : sys.exit(1)
     
     

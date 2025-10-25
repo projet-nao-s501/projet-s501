@@ -45,15 +45,14 @@ def main(session):
 
                 cam.send(img)
                 cam.sleep_until_next_frame()
-    except KeyboardInterrupt:
-        print("\nExit requested by user.")
     finally:
         print("Releasing resources...")
         try:
             video_service.unsubscribe(name_id)
             print("Unsubscribed successfully.")
         except Exception as e:
-            print("Error during unsubscribe:", e)
+            e.add_note(f"Error during unsubscribe")
+            raise e
 
 
 

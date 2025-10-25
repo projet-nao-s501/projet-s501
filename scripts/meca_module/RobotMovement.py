@@ -150,6 +150,7 @@ def marcheRobot(session):
             robotMouvement = RobotMovement(motion_service)
             pos2D = robotMouvement.Pose2D(x=0.5,y=0,theta=0)
             x,y,theta = pos2D.toVector()
+            motion_service.rest()
             if  left != -1 :
                 theta += robotMouvement.modulo2PI(5.0)
             elif  right != -1 :
@@ -158,10 +159,6 @@ def marcheRobot(session):
                 motion_service.moveToward(x, y, theta, [["Frequency", 1.0]])
                 time.sleep(5)  # Déplacement pendant 5 secondes
                 motion_service.stopMove()
-
-    except KeyboardInterrupt:
-        print("Arrêt par l'utilisateur.")
     except Exception as e :
-        print(f"erreur inatendu {e}")
-    motion_service.rest()
+        raise e
 
