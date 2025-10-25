@@ -21,10 +21,10 @@ class RobotMovement:
         Représentation d'une position 2D avec orientation.
         """
 
-        def __init__(self, x=0, y=0, theta=0):
-            self.x = x
-            self.y = y
-            self.theta = theta
+        def __init__(self, x : float = 0, y : float = 0, theta : float = 0):
+            self.x :float = x
+            self.y : float = y
+            self.theta : float = theta
 
         def rotation_matrix(self):
             """
@@ -145,23 +145,19 @@ def marcheRobot(session):
     print("Robot prêt. Appuyez sur Ctrl+C pour arrêter.")
     try:
         while True:
-            # Exemple simple : déplacement vers l'avant avec moveToward
+            left, right = SonarDetection(session,motionAlert)
             robotMouvement = RobotMovement(motion_service)
             pos2D = robotMouvement.Pose2D(x=0.5,y=0,theta=0)
-            position = pos2D.toVector()
-            motion_service.moveToward(position[0], position[1], position[2], [["Frequency", 1.0]])
-            time.sleep(5)  # Déplacement pendant 5 secondes
-            motion_service.stopMove()
-
-            motionAlert = 0.4
-
-            time.sleep(2)  # Pause entre les commandes
-            left, right = SonarDetection(session,motionAlert)
+            x,y,theta = pos2D.toVector()
             if  left != -1 :
-                pass # TODO : décaler le theta de position vers la droite, envoyer une donée décrivant la présence d'un robot dans le champs du sonar
-            if  right != -1 :
-                pass # TODO : décaler le theta de position vers la gauche, envoyer une donée décrivant la présence d'un robot dans le champs du sonar
-                
+                theta += robotMouvement.modulo2PI(5.0)
+            elif  right != -1 :
+                theta -= robotMouvement.modulo2PI(5.0)
+            else :
+                motion_service.moveToward(x, y, theta, [["Frequency", 1.0]])
+                time.sleep(5)  # Déplacement pendant 5 secondes
+                motion_service.stopMove()
+                motionAlert = 0.4
 
     except KeyboardInterrupt:
         print("Arrêt par l'utilisateur.")
