@@ -62,7 +62,7 @@ class RobotMovement:
         """
         Normalise un angle entre 0 et 2*pi.
         """
-        return theta % (2 * np.pi)
+        return theta * np.pi / 180
 
     def getParameter(self, param_name):
         """
@@ -150,15 +150,18 @@ def marcheRobot(session):
             robotMouvement = RobotMovement(motion_service)
             pos2D = robotMouvement.Pose2D(x=0.5,y=0,theta=0)
             x,y,theta = pos2D.toVector()
-            motion_service.rest()
-            if  left != -1 :
-                theta += robotMouvement.modulo2PI(5.0)
-            elif  right != -1 :
-                theta -= robotMouvement.modulo2PI(5.0)
-            else :
-                motion_service.moveToward(x, y, theta, [["Frequency", 1.0]])
-                time.sleep(5)  # Déplacement pendant 5 secondes
-                motion_service.stopMove()
+            while left != -1 or right != -1 :
+                if  left != -1 : theta += robotMouvement.modulo2PI(5.0)
+                else : theta -= robotMouvement.modulo2PI(5.0)
+                if -1.0 < theta < 1.0 : 
+                    motion_service.moveToward(0.0, 0.0, theta, [["Frequency", 0.5]]) # TODO : voir pourquoi le robot tourne plus et marche plus
+                    time.sleep(2)
+                    left, right = SonarDetection(session,motionAlert)
+                else : break
+            if theta < -1  : theta = -1
+            elif theta > 1 : theta = 1
+            motion_service.moveToward(x, y, theta, [["Frequency", 0.5]])
+            time.sleep(5)
     except Exception as e :
         raise e
 
