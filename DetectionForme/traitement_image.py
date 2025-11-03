@@ -1,13 +1,27 @@
-image = cv2.imread('images/128491_01', -1)
+import cv2
+import numpy as np
+import os
+print("Répertoire actuel :", os.getcwd())
 
-gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-retval, dst = cv2.threshold(src, thresh, maxval, type)
+while True :
+    image = cv2.imread('DetectionForme/images/128491_01.jpg')
 
-cv2.namedWindow('Image', cv2.WINDOW_NORMAL)
+    hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+    
+    l_b = np.array([110, 0, 0])
+    u_b = np.array([255, 255, 255])
 
-cv2.resizeWinow('Image', 500, 400)
+    mask = cv2.inRange(hsv, l_b, u_b)
 
-cv2.imshow('Image', image)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+    res = cv2.bitwise_and(image, image, mask=mask)
+
+    cv2.imshow("image", image)
+    cv2.imshow("mask", mask)
+    cv2.imshow("res", res)
+
+    key = cv2.waitKey(1)
+    if key == 27 :
+        break
+
+
