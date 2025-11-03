@@ -13,6 +13,7 @@ import sys
 import time
 import cv2
 import numpy as np
+from scripts.ia_module.traitement_image import detectionRouge
 
 def main(session):
     video_service = session.service("ALVideoDevice")
@@ -51,30 +52,11 @@ def main(session):
         img = np.frombuffer(array, dtype=np.uint8).reshape((height, width, 3))
 
         img2 = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
-        cv2.imshow("Robot Camera", img2)
+        result = detectionRouge(img2)
+        
+        cv2.imshow("Detection du rouge", result)
         
         img = cv2.resize(img, (224, 224), interpolation=cv2.INTER_AREA)
-
-        # # Mise en place motion_service
-        # motion_service  = session.service("ALMotion")
-
-        # # Wake up robot
-        # motion_service.wakeUp()
-
-        # # Marcher devant 
-        # motion_service.moveToward(0.5, 0.0, 0.0, [["Frequency", 1.0]])
-        # time.sleep(10)
-        # motion_service.stopMove()
-
-        # # Marcher derriere
-        # motion_service.moveToward(-0.5, 0.0, 0.0, [["Frequency", 1.0]])
-        # motion_service.stopMove()
-
-        # # Mettre debout
-        # posture_service = session.service("ALRobotPosture")
-        # posture_service.goToPosture("StandInit", 1.0)
-
-
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
@@ -100,3 +82,4 @@ if __name__ == "__main__":
                "Please check your script arguments. Run with -h option for help.")
         sys.exit(1)
     main(session)
+
