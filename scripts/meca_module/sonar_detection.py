@@ -16,17 +16,10 @@ Returns:
     motion_service = session.service("ALMotion")
     position = session.service("ALRobotPosture")
     memory_service = session.service("ALMemory")
-
     Subscriber(session,"myApplication")
 
-    # Important de le lever car le sonnar renverra des données que dans ce cas
-    motion_service.rest()
-    time.sleep(2)
-    position.goToPosture("StandInit", 1.0)
-
-    time.sleep(1) # laisser le temps au robot de lever
     try :
-        leftSensor = memory_service.getData("Device/SubDeviceList/US/Left/Sensor/Value") # TODO : tester Value1 jusqu'à 9 pour voir si ces capteurs marchent
+        leftSensor = memory_service.getData("Device/SubDeviceList/US/Left/Sensor/Value")
         rightSensor = memory_service.getData("Device/SubDeviceList/US/Right/Sensor/Value")
         return (rightSensor if MeterTrak(meterAlert,rightSensor) else -1,leftSensor if MeterTrak(meterAlert,leftSensor) else -1 )
     except Exception as e :
