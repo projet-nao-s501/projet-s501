@@ -1,11 +1,15 @@
 import cv2
 import numpy as np
 import os
+import tensorflow as tf
+
 print("Répertoire actuel :", os.getcwd())
 
+model = tf.keras.applications.MobileNetV2(weights="imagenet")
 
 while True :
-    image = cv2.imread('DetectionForme/images/128491_01.jpg')
+
+    image = cv2.imread('DetectionForme/images/image_03.png')
 
     hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
     
@@ -24,4 +28,17 @@ while True :
     if key == 27 :
         break
 
+    # Prétraiter l'image
+    resized = cv2.resize(image, (224, 224))
+    recsized = tf.keras.preprocessing.image.img_to_array(resized)
+    resized = tf.keras.applications.mobilenet_v2.preprocess_input(resized)
+
+    # Prediction de l'image
+    predictions = model.predict(np.array([resized]))
+    decode_predictions = tf.keras.applications.mobilenet_v2.decode_predictions(predictions, top=5)
+
+    # Affichage résultatd
+
+for _, label, score in decode_predictions[0] :
+    print(f"Ceci est peut être {label} : probabilté {score*100}")
 
