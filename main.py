@@ -29,7 +29,9 @@ def main(session : Any, args : Namespace) -> None :
         test_text_to_speech(session)
     else:
         voice_recognition_sprint1(session)
+    connexionCamera(session)
     marcheRobot(session)
+    
 
 if __name__ == "__main__":
     parser = ArgumentParser(description="Contrôle du robot NAO.")
