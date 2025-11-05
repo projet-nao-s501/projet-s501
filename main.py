@@ -38,10 +38,8 @@ if __name__ == "__main__":
         session.connect(f"tcp://{args.ip}:{args.port}")
         main(session, args)
     except RuntimeError as e:
-        if e.__str__().find("Connect error: 111") != -1 : 
-            print(f"Impossible de se connecter à NAOqi à l'adresse {args.ip}:{args.port}.")
-        else : 
-            print(f"erreur inattendu : {e}") 
+        if e.__str__().find("113") != -1 or e.__str__().find("111") != -1: print(f"Impossible de se connecter à l'adresse : {args.ip}:{args.port}")
+        else : print(f"erreur survenu dans le robot : {e}") 
     except KeyboardInterrupt: print("Arrêt par l'utilisateur.")
     except Exception as e: print(f"erreur inattendu : {e}") 
     

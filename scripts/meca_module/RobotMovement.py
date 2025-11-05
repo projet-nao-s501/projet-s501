@@ -1,6 +1,12 @@
 import numpy as np
 import time
-from .sonar_detection import SonarDetection
+import qi
+
+try :
+    from .sonar_detection import SonarDetection
+except Exception as e :
+    e.add_note("Erreur lors de l'import du package")
+    raise e
 
 class RobotMovement:
     def __init__(self, motion):
@@ -139,28 +145,34 @@ def marcheRobot(session):
     posture_service = session.service("ALRobotPosture")
 
     # Réveil et position initiale debout
-    motion_service.wakeUp()
-    posture_service.goToPosture("StandInit", 1.0)
+    future = motion_service.wakeUp()
+    # future = future.then( lambda x : posture_service.goToPosture("StandInit", 1.0) )
+
+    future = qi.runAsync(motion_service.wakeUp)
+    future = future.then( lambda f : posture_service.goToPosture("StandInit", 1.0) )
+    future.wait()
+    
 
     print("Robot prêt. Appuyez sur Ctrl+C pour arrêter.")
     try:
         while True:
-            motionAlert = 0.4
+            motionAlert = 0.42
             left, right = SonarDetection(session,motionAlert)
             robotMouvement = RobotMovement(motion_service)
             pos2D = robotMouvement.Pose2D(x=0.5,y=0,theta=0)
             x,y,theta = pos2D.toVector()
             while left != -1 or right != -1 :
-                if  left != -1 : theta += robotMouvement.modulo2PI(5.0)
-                else : theta -= robotMouvement.modulo2PI(5.0)
+                if  left != -1 : theta += robotMouvement.modulo2PI(2.5)
+                else : theta -= robotMouvement.modulo2PI(2.5)
                 if -1.0 < theta < 1.0 : 
-                    motion_service.moveToward(0.0, 0.0, theta, [["Frequency", 0.5]]) # TODO : voir pourquoi le robot tourne plus et marche plus
+                    posture_service.goToPosture("StandInit", 1.0)
+                    motion_service.moveToward(0.001, 0.001, theta, [["Frequency", 0.5]])
                     time.sleep(2)
                     left, right = SonarDetection(session,motionAlert)
                 else : break
             if theta < -1  : theta = -1
             elif theta > 1 : theta = 1
-            motion_service.moveToward(x, y, theta, [["Frequency", 0.5]])
+            motion_service.moveToward(x, y, theta, [["Frequency", 1.0]]) # TODO : le robot tourne trop
             time.sleep(5)
     except Exception as e :
         raise e
