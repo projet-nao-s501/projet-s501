@@ -83,7 +83,7 @@ def detecter_couleur(frame, seuil_pourcentage=1.5):
     masque_rouge_gray = cv2.cvtColor(masque_rouge, cv2.COLOR_BGR2GRAY)
     
     if analyser_masque(masque_rouge_gray, seuil_pourcentage):
-        return "rouge"
+        return "red"
     
     return None
 

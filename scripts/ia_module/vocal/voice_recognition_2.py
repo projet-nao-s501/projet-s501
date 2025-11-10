@@ -45,12 +45,12 @@ def voice_recognition_2(session):
         print(f"[INFO] {e}")
 
     # Configuration ASR
-    asr.setLanguage("French")
-    print("[CONFIG] Langue configuree: Francais")
+    asr.setLanguage("English")
+    print("[CONFIG] Langue configuree: English")
     
     # Vocabulaire pour le Sprint 2
     vocabulary = [
-        "quelle couleur"
+        "color"
     ]
     
     asr.setVocabulary(vocabulary, False)
@@ -62,7 +62,7 @@ def voice_recognition_2(session):
     print("\n[INFO] NAO est a l'ecoute. Demandez 'Quelle couleur ?'\n")
     
     # Boucle d'écoute
-    tts.setLanguage("French")
+    tts.setLanguage("English")
     last_word = ""
     iteration = 0
     max_iterations = 200  # Environ 100 secondes (200 x 0.5s)
@@ -82,17 +82,17 @@ def voice_recognition_2(session):
             if confidence > 0.4 and word != last_word:
                 print(f"\n[RECONNU] Mot: '{word}' (confiance: {confidence*100:.0f}%)")
                 
-                if word == "quelle couleur":
+                if word == "color":
                     # Lire la couleur depuis ALMemory
                     couleur = memory.getData("CouleurDetectee")
                     
                     if couleur:
-                        response = f"J'ai detecte du {couleur}"
-                        print(f"[REPONSE] NAO dit: '{response}'")
+                        response = f"I detected {couleur}"
+                        print(f"[RESPONSE] NAO say: '{response}'")
                         tts.say(response)
                     else:
-                        response = "Je n'ai detecte aucune couleur pour le moment"
-                        print(f"[REPONSE] NAO dit: '{response}'")
+                        response = "I did not detect any color"
+                        print(f"[RESPONSE] NAO say: '{response}'")
                         tts.say(response)
                     
                     last_word = word
@@ -129,4 +129,4 @@ if __name__ == "__main__":
         print("  - L'adresse IP et le port sont corrects")
         sys.exit(1)
     
-    voice_recognition_sprint2(session)
+    voice_recognition_2(session)

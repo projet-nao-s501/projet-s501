@@ -23,7 +23,7 @@ def connexionCamera(session):
     memory = session.service("ALMemory") 
     # Pour parler
     tts = session.service("ALTextToSpeech")
-    tts.setLanguage("French") # config en français
+    tts.setLanguage("English") # config en français
 
     # Camera settings
     resolution = 1  # VGA (640x480)
@@ -48,7 +48,6 @@ def connexionCamera(session):
     name_id = ""
     name_id = video_service.subscribeCamera(name_id, camera_index, resolution, color_space, fps)
     print("Subscribed to camera:", name_id)
-
     # Variable pour éviter de répéter l'annonce à chaque frame
     derniere_couleur_annoncee = None
 
@@ -66,7 +65,7 @@ def connexionCamera(session):
 
         # Appel de la fonction detecter_couleur
         # pour analyser l'image
-        couleur_detectee = detecter_couleur(img2, seuil_pourcentage=1.5)
+        couleur_detectee = detecter_couleur(img2, seuil_pourcentage=10)
 
         if couleur_detectee:
             # Stocker la couleur dans ALMemory 
@@ -80,7 +79,7 @@ def connexionCamera(session):
             # une couleur" à chaque 
             # frame)
             if couleur_detectee != derniere_couleur_annoncee:
-                tts.say("J'ai détecté une couleur")
+                tts.say("I detected a color")
                 print(f"[VOCAL] NAO annonce : 'J'ai détecté une couleur'")
                 derniere_couleur_annoncee = couleur_detectee
             else:
