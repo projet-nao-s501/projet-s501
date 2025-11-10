@@ -398,6 +398,8 @@ def surpris(session):
     except Exception as e:
         print(f"✗ Erreur: {e}")
 
+
+
 def calibrate(session):
     """
 Calibrate:
@@ -456,9 +458,7 @@ calibration["rotation_compensation"] = rotation_comp
 
 
 print(f"→ Straight-walk compensation found: {rotation_comp:.4f}")
-
-
-time.sleep(1)
+print(calibration)
 
 def reset_position(session):
     """8. Reset position - Remet le robot en position neutre (tête et mains)"""
@@ -541,7 +541,7 @@ def main():
             elif choice == '7':
                 reset_position(session)
             elif choice == '8':
-                reset_position(session)
+                surpris(session)
             elif choice == '8':
                 calibrate(session)
             elif choice == '0':
