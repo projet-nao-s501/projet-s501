@@ -6,8 +6,12 @@ import sys
 from scripts.meca_module.voice_recognition import test_text_to_speech, voice_recognition_sprint1  # TensorFlow is required for Keras to work
 from scripts.meca_module.RobotMovement import marcheRobot
 
-def main(session) :
-    pass
+def main(session, args) :
+    if args.test:
+        test_text_to_speech(session)
+    else:
+        voice_recognition_sprint1(session)
+    marcheRobot(session)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Contrôle du robot NAO.")
@@ -23,11 +27,7 @@ if __name__ == "__main__":
 
     try:
         session.connect(f"tcp://{args.ip}:{args.port}")
+        main(session, args)
     except RuntimeError:
         print(f"Impossible de se connecter à NAOqi à l'adresse {args.ip}:{args.port}.")
         sys.exit(1)
-    if args.test:
-        test_text_to_speech(session)
-    else:
-        voice_recognition_sprint1(session)
-    marcheRobot(session)

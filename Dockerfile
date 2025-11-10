@@ -7,6 +7,7 @@ RUN apt-get update && apt-get install -y \
     cmake \
     iproute2 \
     iputils-ping \
+    zip \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
