@@ -6,14 +6,27 @@ Script de contrôle NAO simplifié avec menu
 Utilise config.json pour l'IP du robot
 """
 
-import qi
 import sys
 import time
 import json
 import os
+import time
 
-# Mode démo pour tester sans robot
-DEMO_MODE = False
+# Import de qi (requis)
+try:
+    import qi
+except ImportError:
+    print("✗ ERREUR: Module 'qi' non disponible.")
+    print("  Installez-le avec: pip install qi")
+    sys.exit(1)
+
+
+
+calibration = {
+"forward_speed": None, # m/s
+"turn_speed": None, # deg/s
+"rotation_compensation": 0.0 # drift correction
+}
 
 def load_config():
     """Charge la configuration depuis config.json"""
@@ -32,11 +45,6 @@ def connect_to_nao():
     """Connexion au robot NAO"""
     robot_ip, robot_port = load_config()
     
-    if DEMO_MODE:
-        print(f"\n=== MODE DÉMO ACTIVÉ ===")
-        print(f"Simulation de connexion à {robot_ip}:{robot_port}")
-        return None
-    
     print(f"\nConnexion au robot NAO sur {robot_ip}:{robot_port}...")
     session = qi.Session()
     try:
@@ -46,17 +54,16 @@ def connect_to_nao():
     except RuntimeError as e:
         print(f"✗ Impossible de se connecter au robot NAO")
         print(f"Erreur: {e}")
+        print("\nVérifiez que:")
+        print("  1. Le robot est allumé")
+        print("  2. L'IP dans config.json est correcte")
+        print("  3. Votre ordinateur est sur le même réseau")
         sys.exit(1)
 
 
 def stand_up(session):
     """1. Debout - Met le robot en position debout"""
     print("\n=== Position Debout ===")
-    
-    if DEMO_MODE:
-        print("DÉMO: Robot se met debout...")
-        time.sleep(2)
-        return
     
     try:
         motion = session.service("ALMotion")
@@ -78,11 +85,6 @@ def sit_down(session):
     """2. S'asseoir - Met le robot en position assise"""
     print("\n=== Position Assise ===")
     
-    if DEMO_MODE:
-        print("DÉMO: Robot s'assoit...")
-        time.sleep(2)
-        return
-    
     try:
         posture = session.service("ALRobotPosture")
         
@@ -94,25 +96,9 @@ def sit_down(session):
         print(f"✗ Erreur: {e}")
 
 
-def start_virtual_camera(session):
-    """3. Caméra virtuelle - Lance le flux de caméra virtuelle"""
-    print("\n=== Caméra Virtuelle ===")
-    print("Pour lancer la caméra virtuelle, utilisez:")
-    print("  python virtual_cam_simple.py")
-    print("\nOu appuyez sur F5 dans VS Code avec la config 'NAO Camera Simple'")
-    input("\nAppuyez sur Entrée pour continuer...")
-
-
 def scan_vertical_4_crans(session):
-    """4. Scan vertical 4 crans - Scan de bas en haut avec 4 secondes entre chaque"""
-    print("\n=== Scan Vertical 4 Crans ===")
-    
-    if DEMO_MODE:
-        positions = ["Genoux", "Torse", "Poitrine", "Tête"]
-        for i, pos in enumerate(positions, 1):
-            print(f"DÉMO: Cran {i}/4 - {pos} (position plus haute)")
-            time.sleep(4)
-        return
+    """4. Scan vertical 4 crans - Scan du BAS vers le HAUT avec 4 secondes entre chaque"""
+    print("\n=== Scan Vertical 4 Crans (Bas → Haut) ===")
     
     try:
         motion = session.service("ALMotion")
@@ -120,16 +106,16 @@ def scan_vertical_4_crans(session):
         # Activer le contrôle de la tête
         motion.setStiffnesses("Head", 1.0)
         
-        # 4 positions de scan vertical - commencé plus haut
-        # Pitch: négatif = vers le bas, positif = vers le haut
+        # 4 positions de scan vertical - DU BAS VERS LE HAUT
+        # Pitch: négatif = vers le haut, positif = vers le bas
         positions = [
-            ("Genoux", 0.25),     # Bas (plus haut qu'avant)
-            ("Torse", -0.05),     # Centre
-            ("Poitrine", -0.25),  # Haut
-            ("Tête", -0.45)       # Très haut
+            ("Genoux", 0.25),      # Bas (commence ici)
+            ("Torse", -0.05),      # Centre
+            ("Poitrine", -0.25),   # Haut
+            ("Tête", -0.45)        # Très haut
         ]
         
-        print("Début du scan vertical en 4 crans...")
+        print("Début du scan vertical en 4 crans (du bas vers le haut)...")
         for i, (nom, pitch) in enumerate(positions, 1):
             print(f"  Cran {i}/4 - {nom} (pitch: {pitch:.2f})")
             motion.setAngles("HeadPitch", pitch, 0.15)
@@ -144,97 +130,152 @@ def scan_vertical_4_crans(session):
 
 
 def scan_vertical_avec_bras(session):
-    """5. Scan vertical avec bras - Les bras montent vers l'avant et le buste recule pour équilibrer"""
-    print("\n=== Scan Vertical avec Compensation Buste + Bras ===")
+    """4. Scan vertical avec bras - Les bras vers l'avant + corps penché permettent de regarder très haut"""
+    print("\n=== Scan Vertical avec Corps Penché (Bas → Haut) ===")
     
-    if DEMO_MODE:
-        positions = ["Genoux", "Torse", "Poitrine", "Tête (bras avant + buste arrière)"]
-        for i, pos in enumerate(positions, 1):
-            print(f"DÉMO: Cran {i}/4 - {pos}")
-            time.sleep(4)
-        print("DÉMO: Bras et buste reviennent en position normale")
-        return
+    def check_balance(motion, memory):
+        """Vérifie l'équilibre du robot avec les capteurs gyroscopiques"""
+        try:
+            angle_x = memory.getData("Device/SubDeviceList/InertialSensor/AngleX/Sensor/Value")
+            angle_y = memory.getData("Device/SubDeviceList/InertialSensor/AngleY/Sensor/Value")
+            
+            angle_x_deg = angle_x * 180.0 / 3.14159
+            angle_y_deg = angle_y * 180.0 / 3.14159
+            
+            print(f"    🔄 Équilibre: X={angle_x_deg:.1f}° Y={angle_y_deg:.1f}°")
+            
+            MAX_ANGLE = 0.35  # ~20 degrés en radians
+            
+            if abs(angle_x) > MAX_ANGLE or abs(angle_y) > MAX_ANGLE:
+                print(f"    ⚠️  ALERTE: Inclinaison excessive détectée !")
+                return False
+            
+            return True
+        except Exception as e:
+            print(f"    ⚠️  Erreur capteurs: {e}")
+            return True
+    
+    def safe_return_to_normal(motion, memory=None):
+        """Retour sécurisé à la position normale"""
+        try:
+            print("\n  🔄 Retour à la position normale...")
+            
+            # 1. Tête au centre
+            print("    → Tête au centre...")
+            motion.angleInterpolationWithSpeed("HeadPitch", 0.0, 0.08)
+            time.sleep(1)
+            if memory:
+                check_balance(motion, memory)
+            
+            # 2. Corps droit (CRITIQUE avant de bouger les bras)
+            print("    → Corps en position droite...")
+            motion.angleInterpolationWithSpeed(["LHipPitch", "RHipPitch"], [0.0, 0.0], 0.03)
+            time.sleep(2)
+            if memory:
+                check_balance(motion, memory)
+            
+            # 3. Bras en position normale
+            print("    → Bras en position normale...")
+            motion.angleInterpolationWithSpeed(["LShoulderPitch", "RShoulderPitch"], [1.5, 1.5], 0.08)
+            motion.angleInterpolationWithSpeed(["LShoulderRoll", "RShoulderRoll"], [0.1, -0.1], 0.08)
+            motion.angleInterpolationWithSpeed(["LElbowRoll", "RElbowRoll"], [-0.5, 0.5], 0.08)
+            time.sleep(2)
+            if memory:
+                check_balance(motion, memory)
+            
+            return True
+        except Exception as e:
+            print(f"    ✗ Erreur lors du retour: {e}")
+            return False
     
     try:
         motion = session.service("ALMotion")
+        memory = session.service("ALMemory")
         
-        # Activer le contrôle de la tête, des bras et du buste
-        motion.setStiffnesses(["Head", "LArm", "RArm", "Body"], 1.0)
+        print("\n  📡 Initialisation des capteurs...")
+        time.sleep(0.5)
         
-        # Positions des bras vers l'avant pour compensation
-        arm_forward = {
-            "LShoulderPitch": 0.8,   # Bras gauche vers l'avant (moins agressif)
-            "LShoulderRoll": 0.15,   # Légèrement écarté
-            "RShoulderPitch": 0.8,   # Bras droit vers l'avant
-            "RShoulderRoll": -0.15   # Légèrement écarté
-        }
+        # Activation des moteurs
+        print("\n  ⚙️  PHASE 1: Préparation du robot")
+        motion.setStiffnesses(["Head", "LArm", "RArm", "LLeg", "RLeg"], 1.0)
+        time.sleep(1)
         
-        # 4 positions de scan vertical - commencé plus haut
+        # Vérification équilibre initial
+        if not check_balance(motion, memory):
+            print("  ✗ Robot instable au départ. Arrêt.")
+            return
+        
+        # Positionnement des bras en avant (contrepoids)
+        print("  → Positionnement des bras vers l'avant (contrepoids)...")
+        motion.angleInterpolationWithSpeed(["LShoulderPitch", "RShoulderPitch"], [0.3, 0.3], 0.08)
+        time.sleep(1.5)
+        motion.angleInterpolationWithSpeed(["LShoulderRoll", "RShoulderRoll"], [0.20, -0.20], 0.08)
+        time.sleep(1.5)
+        motion.angleInterpolationWithSpeed(["LElbowRoll", "RElbowRoll"], [-0.3, 0.3], 0.08)
+        time.sleep(2)
+        check_balance(motion, memory)
+        
+        # Inclinaison du corps vers l'arrière
+        print("  → Inclinaison du corps vers l'arrière...")
+        motion.angleInterpolationWithSpeed(["LHipPitch", "RHipPitch"], [0.10, 0.10], 0.03)
+        time.sleep(3)
+        
+        if not check_balance(motion, memory):
+            print("  ⚠️  Équilibre compromis. Retour sécurisé.")
+            safe_return_to_normal(motion, memory)
+            return
+        
+        # Scan vertical
+        print("\n  📹 PHASE 2: Scan vertical (Bas → Haut)")
         positions = [
-            ("Genoux", 0.25),     # Bas (plus haut qu'avant)
-            ("Torse", -0.05),     # Centre
-            ("Poitrine", -0.25),  # Haut
-            ("Tête", -0.45)       # Très haut
+            ("Genoux", 0.20),
+            ("Torse", -0.05),
+            ("Poitrine", -0.30),
+            ("Haut", -0.50)
         ]
         
-        print("Début du scan vertical avec compensation buste + bras...")
-        
-        # COMPENSATION: Bras vers l'avant + buste vers l'arrière
-        print("  → Compensation: bras avant + buste arrière...")
-        
-        # Bras vers l'avant
-        for joint, angle in arm_forward.items():
-            motion.setAngles(joint, angle, 0.15)
-        
-        # Buste vers l'arrière pour compenser (HipPitch = flexion hanche)
-        # HipPitch positif = buste vers l'arrière
-        motion.setAngles(["LHipPitch", "RHipPitch"], [0.15, 0.15], 0.15)
-        
-        time.sleep(2)
-        
-        # Scan avec les positions
         for i, (nom, pitch) in enumerate(positions, 1):
-            print(f"  Cran {i}/4 - {nom} (pitch: {pitch:.2f})")
-            motion.setAngles("HeadPitch", pitch, 0.15)
-            time.sleep(4)  # 4 secondes entre chaque cran
+            print(f"  → Position {i}/4: {nom}")
+            
+            if not check_balance(motion, memory):
+                print(f"    ⚠️  Équilibre instable. Arrêt à la position {i-1}.")
+                break
+            
+            motion.angleInterpolationWithSpeed("HeadPitch", pitch, 0.10)
+            time.sleep(2)
+            check_balance(motion, memory)
+            time.sleep(3)  # Temps d'observation
         
-        # RETOUR À LA NORMALE
-        print("  → Retour à la position normale...")
+        # Retour à la normale
+        print("\n  🔄 PHASE 3: Retour à la position normale")
+        safe_return_to_normal(motion, memory)
         
-        # Buste en position normale
-        motion.setAngles(["LHipPitch", "RHipPitch"], [0.0, 0.0], 0.15)
-        
-        # Bras le long du corps
-        motion.setAngles(["LShoulderPitch", "RShoulderPitch"], [1.5, 1.5], 0.15)
-        motion.setAngles(["LShoulderRoll", "RShoulderRoll"], [0.1, -0.1], 0.15)
-        
-        # Tête au centre
-        motion.setAngles("HeadPitch", 0.0, 0.15)
-        time.sleep(2)
-        
-        print("✓ Scan vertical avec compensation terminé")
+        print("\n✓ Scan terminé avec succès !")
+        print("  Le robot a pu observer très haut grâce à l'inclinaison du corps.")
         
     except Exception as e:
-        print(f"✗ Erreur: {e}")
+        print(f"\n✗ ERREUR: {e}")
+        print("\n⚠️  Remise en position sécurisée...")
+        
+        try:
+            motion = session.service("ALMotion")
+            try:
+                memory = session.service("ALMemory")
+            except:
+                memory = None
+            
+            if not safe_return_to_normal(motion, memory):
+                print("\n  🚫 URGENT: Stabilisez le robot MANUELLEMENT !")
+                print("    1. Tenez le robot")
+                print("    2. Utilisez l'option 7 (Reset) après stabilisation")
+        except Exception as e2:
+            print(f"  ✗ Erreur critique: {e2}")
+            print("  🚫 ACTION REQUISE: Stabilisez le robot immédiatement !")
 
 
 def scan_tete_complet(session):
     """6. Scan tête complet - Gauche/Droite puis Bas/Haut et retour au centre"""
     print("\n=== Scan Tête Complet ===")
-    
-    if DEMO_MODE:
-        mouvements = [
-            "Tête → Gauche maximum",
-            "Tête → Droite maximum", 
-            "Tête → Centre",
-            "Tête → Bas maximum",
-            "Tête → Haut maximum",
-            "Tête → Centre"
-        ]
-        for mouv in mouvements:
-            print(f"DÉMO: {mouv}")
-            time.sleep(2)
-        return
     
     try:
         motion = session.service("ALMotion")
@@ -277,78 +318,151 @@ def scan_tete_complet(session):
 
 
 def point_and_alert(session):
-    """7. Pointer et alerter - Pointe un doigt vers le haut et dit 'Intrus trouvé'"""
-    print("\n=== Alerte Intrus ===")
-    
-    if DEMO_MODE:
-        print("DÉMO: Lève le bras droit et pointe vers le haut...")
-        time.sleep(2)
-        print('DÉMO: Dit "Intrus trouvé!"')
-        time.sleep(2)
-        print("DÉMO: Remet le bras en position normale")
-        return
+    """7. Pointer vers une personne - Pointe à 75° vers le haut (vers une personne debout) et dit 'Intrus trouvé'"""
+    print("\n=== Alerte Intrus (Pointer vers personne debout) ===")
     
     try:
         motion = session.service("ALMotion")
         tts = session.service("ALTextToSpeech")
         
         # Activer le contrôle du bras droit
+        print("  → Activation du bras droit...")
         motion.setStiffnesses("RArm", 1.0)
+        time.sleep(0.5)
         
-        print("  → Lève le bras et pointe vers le haut...")
+        print("  → Pointe vers une personne debout (75°)...")
         
-        # Position pour pointer vers le haut avec le bras droit
-        # ShoulderPitch: vers l'avant/haut
-        # ShoulderRoll: écartement
-        # ElbowYaw: rotation du coude
-        # ElbowRoll: flexion du coude
-        # WristYaw: rotation du poignet
-        # Hand: ouverture de la main
+        # Position pour pointer à 75° vers le haut (vers tête d'une personne debout)
+        # 75° = ~1.31 radians
+        # Pour NAO: ShoulderPitch négatif = bras lève vers le haut
+        # -1.31 rad = 75° vers le haut
         
-        pointing_position = {
-            "RShoulderPitch": -1.3,   # Bras vers le haut
-            "RShoulderRoll": -0.3,    # Légèrement écarté du corps
-            "RElbowYaw": 1.2,         # Rotation du coude
-            "RElbowRoll": 0.5,        # Coude légèrement plié
-            "RWristYaw": 0.0,         # Poignet droit
-            "RHand": 0.0              # Main fermée (doigt pointé)
-        }
-        
-        for joint, angle in pointing_position.items():
-            motion.setAngles(joint, angle, 0.2)
+        # Lever le bras progressivement
+        motion.angleInterpolationWithSpeed("RShoulderPitch", -1.31, 0.15)  # 75° vers le haut
+        motion.angleInterpolationWithSpeed("RShoulderRoll", -0.15, 0.15)   # Légèrement écarté
+        motion.angleInterpolationWithSpeed("RElbowRoll", 0.3, 0.15)        # Coude légèrement plié
+        motion.angleInterpolationWithSpeed("RElbowYaw", 1.0, 0.15)         # Rotation coude
+        motion.angleInterpolationWithSpeed("RWristYaw", 0.0, 0.15)        # Poignet droit
+        motion.angleInterpolationWithSpeed("RHand", 0.0, 0.15)            # Main fermée (index pointé)
         
         time.sleep(2)
         
         # Dire le message
         print("  → 'Intrus trouvé!'")
         tts.say("Intrus trouvé!")
-        time.sleep(1)
+        time.sleep(1.5)
         
         # Remettre le bras en position normale
         print("  → Bras en position normale...")
-        motion.setAngles("RShoulderPitch", 1.5, 0.2)
-        motion.setAngles("RShoulderRoll", -0.1, 0.2)
-        motion.setAngles("RElbowRoll", 0.5, 0.2)
-        motion.setAngles("RElbowYaw", 1.2, 0.2)
-        motion.setAngles("RHand", 0.6, 0.2)
-        time.sleep(1)
+        motion.angleInterpolationWithSpeed("RShoulderPitch", 1.5, 0.15)
+        motion.angleInterpolationWithSpeed("RShoulderRoll", -0.1, 0.15)
+        motion.angleInterpolationWithSpeed("RElbowRoll", 0.5, 0.15)
+        motion.angleInterpolationWithSpeed("RElbowYaw", 1.2, 0.15)
+        motion.angleInterpolationWithSpeed("RHand", 0.6, 0.15)
+        time.sleep(2)
         
         print("✓ Alerte terminée")
         
     except Exception as e:
         print(f"✗ Erreur: {e}")
+        import traceback
+        traceback.print_exc()
+        input("\nAppuyez sur Entrée pour continuer...")
 
+def surpris(session):
+    """Lever la main droite à 50° et ouvrir la main"""
+    print("\n=== Lever main droite 50° + Ouvrir main ===")
+    
+    try:
+        motion = session.service("ALMotion")
+
+        # Activer le bras droit
+        motion.setStiffnesses("RArm", 1.0)
+        time.sleep(0.3)
+
+        # 50° vers le haut = -50° en radians
+        shoulder_pitch = -0.8727  # -50° en radians
+
+        print("  → Ouverture de la main...")
+        motion.angleInterpolationWithSpeed("RHand", 1.0, 0.2)   # Main ouverte
+
+        print("  → Levée du bras à 50°...")
+        motion.angleInterpolationWithSpeed("RShoulderPitch", shoulder_pitch, 0.02) # La deuximee valeur est la vitesse
+        motion.angleInterpolationWithSpeed("RShoulderRoll", -0.15, 0.2)
+        motion.angleInterpolationWithSpeed("RElbowRoll", 0.3, 0.2)
+        motion.angleInterpolationWithSpeed("RElbowYaw", 1.0, 0.2)
+        motion.angleInterpolationWithSpeed("RWristYaw", 0.0, 0.2)
+
+        print("✓ Mouvement terminé")
+
+    except Exception as e:
+        print(f"✗ Erreur: {e}")
+
+def calibrate(session):
+    """
+Calibrate:
+1. Forward speed
+2. Rotation speed
+3. Straight line compensation using sonars
+"""
+
+
+motion = session.service("ALMotion")
+memory = session.service("ALMemory")
+
+
+print("=== CALIBRATION START ===")
+motion.wakeUp()
+
+
+##############################################################
+# 1. STRAIGHT LINE COMPENSATION USING SONARS
+##############################################################
+print("\n[1/3] Calibrating straight-walk compensation using sonars...")
+
+
+K = 1.0
+duration = 4
+t0 = time.time()
+rotation_sum = 0
+count = 0
+
+
+while time.time() - t0 < duration:
+left = memory.getData("Device/SubDeviceList/US/Left/Sensor/Value")
+right = memory.getData("Device/SubDeviceList/US/Right/Sensor/Value")
+
+
+if left is None: left = 0.0
+if right is None: right = 0.0
+
+
+erreur = left - right
+rotation = erreur * K
+rotation = max(min(rotation, 0.2), -0.2)
+
+
+motion.moveToward(0.3, 0.0, rotation)
+
+
+rotation_sum += rotation
+count += 1
+time.sleep(0.1)
+
+
+motion.stopMove()
+rotation_comp = rotation_sum / max(count, 1)
+calibration["rotation_compensation"] = rotation_comp
+
+
+print(f"→ Straight-walk compensation found: {rotation_comp:.4f}")
+
+
+time.sleep(1)
 
 def reset_position(session):
     """8. Reset position - Remet le robot en position neutre (tête et mains)"""
     print("\n=== Reset Position ===")
-    
-    if DEMO_MODE:
-        print("DÉMO: Tête revient au centre...")
-        print("DÉMO: Bras reviennent en position normale...")
-        print("DÉMO: Mains s'ouvrent...")
-        time.sleep(2)
-        return
     
     try:
         motion = session.service("ALMotion")
@@ -385,27 +499,22 @@ def display_menu():
     print("="*50)
     print("1. Debout")
     print("2. S'asseoir")
-    print("3. Caméra virtuelle")
-    print("4. Scan vertical 4 crans (4s entre chaque)")
-    print("5. Scan vertical avec bras avant (compensation)")
-    print("6. Scan tête complet (gauche/droite + bas/haut)")
-    print("7. Pointer vers le haut + 'Intrus trouvé'")
-    print("8. Reset position (tête et mains)")
-    print("9. Quitter")
+    print("3. Scan vertical 4 crans (Bas → Haut, 4s/cran)")
+    print("4. 🔥 Scan avec bras (Bas → PLAFOND, penché + bras avant)")
+    print("5. Scan tête complet (gauche/droite + bas/haut)")
+    print("6. Pointer vers personne (75°) + 'Intrus trouvé'")
+    print("7. Reset position (tête et mains)")
+    print("8. Surprise pas sympas")
+    print("9. Calibrage")
+    print("0. Quitter")
     print("="*50)
 
 
 def main():
     """Fonction principale avec menu"""
-    global DEMO_MODE
-    
     print("\n" + "="*50)
     print("   SYSTÈME DE CONTRÔLE NAO - PROJET S501")
     print("="*50)
-    
-    # Demander le mode
-    mode = input("\nMode DÉMO (sans robot) ? (o/n) [n]: ").strip().lower()
-    DEMO_MODE = (mode == 'o' or mode == 'oui')
     
     # Connexion au robot
     session = connect_to_nao()
@@ -415,29 +524,31 @@ def main():
         display_menu()
         
         try:
-            choice = input("\nVotre choix (1-9): ").strip()
+            choice = input("\nVotre choix (1-8): ").strip()
             
             if choice == '1':
                 stand_up(session)
             elif choice == '2':
                 sit_down(session)
             elif choice == '3':
-                start_virtual_camera(session)
-            elif choice == '4':
                 scan_vertical_4_crans(session)
-            elif choice == '5':
+            elif choice == '4':
                 scan_vertical_avec_bras(session)
-            elif choice == '6':
+            elif choice == '5':
                 scan_tete_complet(session)
-            elif choice == '7':
+            elif choice == '6':
                 point_and_alert(session)
+            elif choice == '7':
+                reset_position(session)
             elif choice == '8':
                 reset_position(session)
-            elif choice == '9':
+            elif choice == '8':
+                calibrate(session)
+            elif choice == '0':
                 print("\nAu revoir!")
                 break
             else:
-                print("\n✗ Choix invalide. Veuillez choisir entre 1 et 9.")
+                print("\n✗ Choix invalide. Veuillez choisir entre 1 et 8.")
                 
         except KeyboardInterrupt:
             print("\n\nInterruption par l'utilisateur.")
@@ -446,7 +557,7 @@ def main():
             print(f"\n✗ Erreur: {e}")
     
     # Nettoyage
-    if session and not DEMO_MODE:
+    if session:
         try:
             motion = session.service("ALMotion")
             motion.rest()
