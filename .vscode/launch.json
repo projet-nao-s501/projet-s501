@@ -13,6 +13,15 @@
             "console": "integratedTerminal",
             "args": ["--ip", "172.16.1.163", "--port", "9559"]
 
+        },
+        {
+            "name": "Débogueur Python avec ip docker: Fichier actuel",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": ["--ip", "host.docker.internal", "--port", "60324"]
+
         }
     ]
 }

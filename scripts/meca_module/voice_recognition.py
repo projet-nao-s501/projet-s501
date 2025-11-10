@@ -29,16 +29,19 @@ def voice_recognition_sprint1(session):
                 asr.unsubscribe(subscriber)
                 print(f"  Désabonné: {subscriber}")
             except Exception as e:
-                print(f"  Impossible de désabonner {subscriber}: {e}")
+                e.add_note(f"  Impossible de désabonner {subscriber}")
+                raise e
     except Exception as e:
-        print(f"Erreur lors du nettoyage: {e}")
+        e.add_note(f"Erreur lors du nettoyage")
+        raise e
     
     # PAUSE explicite du moteur ASR
     try:
         asr.pause(True)
         print("Moteur ASR mis en pause")
     except Exception as e:
-        print(f"Info: {e}")
+        e.add_note(f"Info:")
+        raise e
 
     print("RECONNAISSANCE VOCALE NAO - SPRINT 1")
     

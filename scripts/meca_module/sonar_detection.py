@@ -1,57 +1,49 @@
 import time 
 from typing import Any
-from ..utils.subricber import Subriber
+from ..utils.subricber import Subscriber
 
-def SonarDetection(session : Any) -> None:
+def SonarDetection(session : Any, meterAlert : int, numeroDuCapteur : int = None) -> tuple[int,int]:
     """
 Interprétation de la détection du sonar.
 
 Args:
     session: une session avec le robot
+    meterAlert: distance à partir de laquelle on souhaite être alerté
+
+Returns:
+    un tuple de deux entier contenant la distance avec le robot -1 si rien n'est détecté
     """
     motion_service = session.service("ALMotion")
-    position = session.service("ALRobotPosture")
-    sonar_service = session.service("ALSonar")
+    position = session.service("ALRobotPosture")                
     memory_service = session.service("ALMemory")
+    Subscriber(session,"myApplication")
 
-    sonar_service.subscribe("myApplication")
+    if numeroDuCapteur is None : 
+        try :
+            leftSensor = memory_service.getData("Device/SubDeviceList/US/Left/Sensor/Value")
+            rightSensor = memory_service.getData("Device/SubDeviceList/US/Right/Sensor/Value")
+        except Exception as e :
+            raise e
+    else : 
+        try :
+            leftSensor = memory_service.getData("Device/SubDeviceList/US/Left/Sensor/Value", numeroDuCapteur)
+            rightSensor = memory_service.getData("Device/SubDeviceList/US/Right/Sensor/Value", numeroDuCapteur)
+        except Exception as e :
+            raise e
+    return (rightSensor if MeterTrak(meterAlert,rightSensor) else -1,leftSensor if MeterTrak(meterAlert,leftSensor) else -1 )
 
-    # Important de le lever car le sonnar renverra des données que dans ce cas
-    motion_service.rest()
-    time.sleep(2)
-    position.goToPosture("StandInit", 1.0)
-
-    time.sleep(1) # laisser le temps au robot de lever
-    try :
-        leftSensor = memory_service.getData("Device/SubDeviceList/US/Left/Sensor/Value") # TODO : tester Value1 jusqu'à 9 pour voir si ces capteurs marchent
-        rightSensor = memory_service.getData("Device/SubDeviceList/US/Right/Sensor/Value")
-        meterAlertValue = 0.4
-        isDepassed = meterTrak(meterAlertValue,rightSensor,leftSensor)
-        
-        if(isDepassed) :
-            # TODO : la future fonction qui gèrera le dépassement de la frontière
-            print(f"La frontiere de {meterAlertValue} est franchi")
-            print(f"détection à gauche : {leftSensor}; détection à droite {rightSensor}")
-
-    except Exception as e :
-        print(e)
-        return
-
-    sonar_service.unsubscribe("myApplication")
-
-def meterTrak(meterAlertValue : int, rightSensor : float, leftSensor : float) -> bool :
+def MeterTrak(meterAlertValue : int, sensor : float) -> bool :
     """
 S'assure que le robot n'atteint pas la distance donnée par meterAlertValue
 
 Args:
     meterAlertValue: la distance avec un objet à ne pas atteindre
-    rightSensor: donnée du sonar droit du robot
-    leftSensor: donnée du sonar gauche du robot
+    sensor: donnée du sonar
     
 Returns:
     vrai si meterAlertValue est atteinte
     
     """
-    return meterAlertValue >= rightSensor and meterAlertValue >= leftSensor
+    return meterAlertValue >= sensor > 0.0
 
 if __name__ == '__main__' : pass
