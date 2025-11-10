@@ -14,6 +14,7 @@ from scripts.meca_module.voice_recognition import test_text_to_speech, voice_rec
 from scripts.meca_module.RobotMovement import marcheRobot
 import time
 from scripts.utils.connexion_camera import connexionCamera
+from scripts.meca_module.testSonardIeme import testTousLesCapteurs
 from typing import Any
 
 def main(session : Any, args : Namespace) -> None :
@@ -24,13 +25,14 @@ def main(session : Any, args : Namespace) -> None :
         session: la session qui représente la connexion avec le robot
         args: les arguments passés lors de l'appel du fichier
     
-    """
-    if args.test:
-        test_text_to_speech(session)
-    else:
-        voice_recognition_sprint1(session)
-    connexionCamera(session)
+    # """
+    # if args.test:
+    #     test_text_to_speech(session)
+    # else:
+    #     voice_recognition_sprint1(session)
+    # connexionCamera(session)
     marcheRobot(session)
+    # testTousLesCapteurs(session)
     
 
 if __name__ == "__main__":

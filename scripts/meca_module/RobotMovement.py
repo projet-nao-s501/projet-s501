@@ -70,14 +70,7 @@ class RobotMovement:
         """
         return theta * np.pi / 180
 
-    def getParameter(self, param_name):
-        """
-        TODO : Implémenter la récupération des paramètres selon contexte.
-        Par exemple via une interface utilisateur ou configuration.
-        """
-        raise NotImplementedError("La méthode getParameter() doit être définie pour récupérer les paramètres.")
-
-    def onInput_onStart(self):
+    def onInput_onStart(self, distance_x, distance_y ,theta_rad):
         """
         Lance le déplacement du robot selon paramètres donnés.
         Vérifie la position finale et déclenche les callbacks correspondants.
@@ -86,22 +79,12 @@ class RobotMovement:
         robot_pos = self.motion.getRobotPosition(True)  # [x, y, theta]
         init_position = self.Pose2D(robot_pos[0], robot_pos[1], robot_pos[2])
 
-        # Récupération des paramètres de déplacement
-        distance_x = self.getParameter("Distance X (m)")
-        distance_y = self.getParameter("Distance Y (m)")
-        theta_deg = self.getParameter("Theta (deg)")
-        theta_rad = np.deg2rad(theta_deg)
-
         # Calcul de la position cible attendue
-        target_distance = self.Pose2D(distance_x, distance_y, theta_rad)
+        target_distance = self.Pose2D(robot_pos[0]+distance_x, robot_pos[1]+distance_y, theta_rad)
         expected_end_position = init_position * target_distance
 
-        # Activation ou non du mouvement des bras
-        enable_arms = self.getParameter("Arms movement enabled")
-        self.motion.setMoveArmsEnabled(enable_arms, enable_arms)
-
         # Commande de déplacement
-        self.motion.moveTo(distance_x, distance_y, theta_rad)
+        self.motion.moveTo(target_distance.toVector()[0],target_distance.toVector()[1], theta_rad)
 
         # Lecture de la position finale réelle
         robot_pos_end = self.motion.getRobotPosition(False)
@@ -144,36 +127,28 @@ def marcheRobot(session):
     motion_service = session.service("ALMotion")
     posture_service = session.service("ALRobotPosture")
 
-    # Réveil et position initiale debout
-    future = motion_service.wakeUp()
-    # future = future.then( lambda x : posture_service.goToPosture("StandInit", 1.0) )
-
-    future = qi.runAsync(motion_service.wakeUp)
-    future = future.then( lambda f : posture_service.goToPosture("StandInit", 1.0) )
-    future.wait()
+    motion_service.wakeUp()
+    posture_service.goToPosture("StandInit", 1.0)
     
-
     print("Robot prêt. Appuyez sur Ctrl+C pour arrêter.")
     try:
+        future = qi.runAsync(motion_service.moveToward,0.125,0.125,0.0,[["Frequency",1.0]])
         while True:
             motionAlert = 0.42
-            left, right = SonarDetection(session,motionAlert)
             robotMouvement = RobotMovement(motion_service)
             pos2D = robotMouvement.Pose2D(x=0.5,y=0,theta=0)
             x,y,theta = pos2D.toVector()
+            right, left = SonarDetection(session,motionAlert)
             while left != -1 or right != -1 :
+                future.value()
                 if  left != -1 : theta += robotMouvement.modulo2PI(2.5)
                 else : theta -= robotMouvement.modulo2PI(2.5)
-                if -1.0 < theta < 1.0 : 
-                    posture_service.goToPosture("StandInit", 1.0)
-                    motion_service.moveToward(0.001, 0.001, theta, [["Frequency", 0.5]])
-                    time.sleep(2)
-                    left, right = SonarDetection(session,motionAlert)
+                if -1.0 < theta < 1.0 :
+                    future = qi.runAsync(motion_service.moveToward,0.005,0.005,theta,[["Frequency",1.0]])
+                    right, left = SonarDetection(session,motionAlert)
                 else : break
             if theta < -1  : theta = -1
             elif theta > 1 : theta = 1
-            motion_service.moveToward(x, y, theta, [["Frequency", 1.0]]) # TODO : le robot tourne trop
-            time.sleep(5)
     except Exception as e :
         raise e
 

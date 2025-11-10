@@ -2,7 +2,7 @@ import time
 from typing import Any
 from ..utils.subricber import Subscriber
 
-def SonarDetection(session : Any, meterAlert : int) -> tuple[int,int]:
+def SonarDetection(session : Any, meterAlert : int, numeroDuCapteur : int = None) -> tuple[int,int]:
     """
 Interprétation de la détection du sonar.
 
@@ -14,16 +14,23 @@ Returns:
     un tuple de deux entier contenant la distance avec le robot -1 si rien n'est détecté
     """
     motion_service = session.service("ALMotion")
-    position = session.service("ALRobotPosture")
+    position = session.service("ALRobotPosture")                
     memory_service = session.service("ALMemory")
     Subscriber(session,"myApplication")
 
-    try :
-        leftSensor = memory_service.getData("Device/SubDeviceList/US/Left/Sensor/Value")
-        rightSensor = memory_service.getData("Device/SubDeviceList/US/Right/Sensor/Value")
-        return (rightSensor if MeterTrak(meterAlert,rightSensor) else -1,leftSensor if MeterTrak(meterAlert,leftSensor) else -1 )
-    except Exception as e :
-        raise e
+    if numeroDuCapteur is None : 
+        try :
+            leftSensor = memory_service.getData("Device/SubDeviceList/US/Left/Sensor/Value")
+            rightSensor = memory_service.getData("Device/SubDeviceList/US/Right/Sensor/Value")
+        except Exception as e :
+            raise e
+    else : 
+        try :
+            leftSensor = memory_service.getData("Device/SubDeviceList/US/Left/Sensor/Value", numeroDuCapteur)
+            rightSensor = memory_service.getData("Device/SubDeviceList/US/Right/Sensor/Value", numeroDuCapteur)
+        except Exception as e :
+            raise e
+    return (rightSensor if MeterTrak(meterAlert,rightSensor) else -1,leftSensor if MeterTrak(meterAlert,leftSensor) else -1 )
 
 def MeterTrak(meterAlertValue : int, sensor : float) -> bool :
     """
