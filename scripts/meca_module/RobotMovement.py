@@ -132,23 +132,27 @@ def marcheRobot(session):
     
     print("Robot prêt. Appuyez sur Ctrl+C pour arrêter.")
     try:
-        future = qi.runAsync(motion_service.moveToward,0.125,0.125,0.0,[["Frequency",1.0]])
+        motion_service.moveToward(0.125,0.125,0.0,[["Frequency",1.0]])
         while True:
             motionAlert = 0.42
             robotMouvement = RobotMovement(motion_service)
             pos2D = robotMouvement.Pose2D(x=0.5,y=0,theta=0)
-            x,y,theta = pos2D.toVector()
+            _,_,theta = pos2D.toVector()
             right, left = SonarDetection(session,motionAlert)
             while left != -1 or right != -1 :
-                future.value()
-                if  left != -1 : theta += robotMouvement.modulo2PI(2.5)
-                else : theta -= robotMouvement.modulo2PI(2.5)
+                isStoped = motion_service.stopMove()
+                if  left != -1 : theta -= robotMouvement.modulo2PI(2.5)
+                else : theta += robotMouvement.modulo2PI(2.5)
                 if -1.0 < theta < 1.0 :
-                    future = qi.runAsync(motion_service.moveToward,0.005,0.005,theta,[["Frequency",1.0]])
                     right, left = SonarDetection(session,motionAlert)
+                    if isStoped : 
+                        motion_service.moveToward(0.005,0.005,theta,[["Frequency",0.5]])
+                        time.sleep(2)
+                        motion_service.stopMove()
                 else : break
             if theta < -1  : theta = -1
             elif theta > 1 : theta = 1
+            if not(motion_service.moveIsActive()) : motion_service.moveToward(0.125,0.125,0.0,[["Frequency",1.0]])
     except Exception as e :
         raise e
 

@@ -12,9 +12,7 @@ from argparse import ArgumentParser, Namespace
 import sys
 from scripts.meca_module.voice_recognition import test_text_to_speech, voice_recognition_sprint1  # TensorFlow is required for Keras to work
 from scripts.meca_module.RobotMovement import marcheRobot
-import time
 from scripts.utils.connexion_camera import connexionCamera
-from scripts.meca_module.testSonardIeme import testTousLesCapteurs
 from typing import Any
 
 def main(session : Any, args : Namespace) -> None :
