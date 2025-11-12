@@ -77,7 +77,7 @@ cv2.destroyAllWindows()
 # Ouvrir la webcam (0 = webcam par défaut, 1 = autre caméra si branchée)
 cap = cv2.VideoCapture(0)
 
-# ici ret c'est pour retiourner un booléan qui va dire si la capture de l'image est bien 
+# ici ret c'est pour retourner un booléan qui va dire si la capture de l'image est bien 
 # ici frame est l'image capturer par la webcam
 while True:
     ret, frame = cap.read() # Récupère une image
