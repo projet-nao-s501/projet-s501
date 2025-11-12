@@ -12,6 +12,10 @@ import argparse
 import sys
 import time
 from scripts.utils.connexion_camera import connexionCamera
+from typing import Any
+
+def main(session : Any) :
+    connexionCamera(session)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -24,9 +28,8 @@ if __name__ == "__main__":
     session = qi.Session()
     try:
         session.connect("tcp://" + args.ip + ":" + str(args.port))
+        main(session)
     except RuntimeError:
         print ("Can't connect to Naoqi at ip \"" + args.ip + "\" on port " + str(args.port) +".\n"
                "Please check your script arguments. Run with -h option for help.")
         sys.exit(1)
-    connexionCamera(session)
-
