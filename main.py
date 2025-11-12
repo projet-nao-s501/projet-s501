@@ -3,15 +3,9 @@
 import qi
 import argparse
 import sys
-from scripts.meca_module.voice_recognition import test_text_to_speech, voice_recognition_sprint1  # TensorFlow is required for Keras to work
-from scripts.meca_module.RobotMovement import marcheRobot
 
 def main(session, args) :
-    if args.test:
-        test_text_to_speech(session)
-    else:
-        voice_recognition_sprint1(session)
-    marcheRobot(session)
+    pass
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Contrôle du robot NAO.")
