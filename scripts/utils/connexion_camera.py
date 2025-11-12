@@ -80,12 +80,12 @@ def connexionCamera(session):
             # frame)
             if couleur_detectee != derniere_couleur_annoncee:
                 tts.say("I detected a color")
-                print(f"[VOCAL] NAO annonce : 'J'ai détecté une couleur'")
+                print(f"[VOCAL] NAO annonce : 'I detected a color'")
                 derniere_couleur_annoncee = couleur_detectee
-            else:
-                # Aucune couleur détectée : réinitialiser
-                memory.insertData("CouleurDetectee", None)
-                derniere_couleur_annoncee = None
+        else:
+            # Aucune couleur détectée : réinitialiser
+            memory.insertData("CouleurDetectee", None)
+            derniere_couleur_annoncee = None
         
         # Affichage visuel (comme avant)
         result = detectionRouge(img2)
