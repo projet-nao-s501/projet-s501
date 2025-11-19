@@ -9,7 +9,7 @@ model = tf.keras.applications.MobileNetV2(weights="imagenet")
 
 while True :
 
-    image = cv2.imread('DetectionForme/images/image_03.png')
+    image = cv2.imread('DetectionForme/images/128491_01.jpg')
 
     hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
     

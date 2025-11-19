@@ -53,7 +53,7 @@ class Net(nn.Module):
         self.conv2 = nn.Conv2d(6, 16, 5)
         self.fc1 = nn.Linear(16 * 5 * 5, 120)
         self.fc2 = nn.Linear(120, 84)
-        self.fc3 = nn.Linear(84, 3) # number of classes
+        self.fc3 = nn.Linear(84, 3) # 3 for number of classes
 
     def forward(self, x):
         x = self.pool(func.relu(self.conv1(x)))
@@ -115,7 +115,7 @@ _, predicted = torch.max(outputs, 1)
 
 print('Predicted: ', ' '.join(f'{cloth_classes[predicted[j]]:5s}' for j in range(4)))
 
-# For the whole dataset
+# For the whole dataset evaluation
 # correct = 0
 # total = 0
 # # since we're not training, we don't need to calculate the gradients for our outputs
