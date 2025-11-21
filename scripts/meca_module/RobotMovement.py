@@ -1,25 +1,19 @@
 import numpy as np
 import time
+import qi
+
+try :
+    from .sonar_detection import SonarDetection
+except Exception as e :
+    e.add_note("Erreur lors de l'import du package")
+    raise e
 
 class RobotMovement:
-    def __init__(self):
+    def __init__(self, motion):
         # Seuils d'erreur pour considérer le déplacement réussi
         self.positionErrorThresholdPos = 0.01  # 1 cm
         self.positionErrorThresholdAng = 0.03  # ~1.7 degrés
-        self.motion = None  # Référence au service ALMotion
-
-    def session(self):
-        """
-        Méthode à surcharger pour injecter la session NAOqi.
-        Doit retourner la session active.
-        """
-        raise NotImplementedError("La méthode session() doit être définie pour accéder aux services.")
-
-    def onLoad(self):
-        """
-        Récupère le service ALMotion à partir de la session.
-        """
-        self.motion = self.session().service("ALMotion")
+        self.motion = motion
 
     def onUnload(self):
         """
@@ -33,10 +27,10 @@ class RobotMovement:
         Représentation d'une position 2D avec orientation.
         """
 
-        def __init__(self, x=0, y=0, theta=0):
-            self.x = x
-            self.y = y
-            self.theta = theta
+        def __init__(self, x : float = 0, y : float = 0, theta : float = 0):
+            self.x :float = x
+            self.y : float = y
+            self.theta : float = theta
 
         def rotation_matrix(self):
             """
@@ -55,7 +49,7 @@ class RobotMovement:
             new_theta = self.theta + other.theta
             return RobotMovement.Pose2D(new_pos[0], new_pos[1], new_theta)
 
-        def diff(self, other):
+        def __sub__(self, other):
             """
             Différence entre deux poses : self - other.
             """
@@ -74,16 +68,9 @@ class RobotMovement:
         """
         Normalise un angle entre 0 et 2*pi.
         """
-        return theta % (2 * np.pi)
+        return theta * np.pi / 180
 
-    def getParameter(self, param_name):
-        """
-        TODO : Implémenter la récupération des paramètres selon contexte.
-        Par exemple via une interface utilisateur ou configuration.
-        """
-        raise NotImplementedError("La méthode getParameter() doit être définie pour récupérer les paramètres.")
-
-    def onInput_onStart(self):
+    def onInput_onStart(self, distance_x, distance_y ,theta_rad):
         """
         Lance le déplacement du robot selon paramètres donnés.
         Vérifie la position finale et déclenche les callbacks correspondants.
@@ -92,29 +79,19 @@ class RobotMovement:
         robot_pos = self.motion.getRobotPosition(True)  # [x, y, theta]
         init_position = self.Pose2D(robot_pos[0], robot_pos[1], robot_pos[2])
 
-        # Récupération des paramètres de déplacement
-        distance_x = self.getParameter("Distance X (m)")
-        distance_y = self.getParameter("Distance Y (m)")
-        theta_deg = self.getParameter("Theta (deg)")
-        theta_rad = np.deg2rad(theta_deg)
-
         # Calcul de la position cible attendue
-        target_distance = self.Pose2D(distance_x, distance_y, theta_rad)
+        target_distance = self.Pose2D(robot_pos[0]+distance_x, robot_pos[1]+distance_y, theta_rad)
         expected_end_position = init_position * target_distance
 
-        # Activation ou non du mouvement des bras
-        enable_arms = self.getParameter("Arms movement enabled")
-        self.motion.setMoveArmsEnabled(enable_arms, enable_arms)
-
         # Commande de déplacement
-        self.motion.moveTo(distance_x, distance_y, theta_rad)
+        self.motion.moveTo(target_distance.toVector()[0],target_distance.toVector()[1], theta_rad)
 
         # Lecture de la position finale réelle
         robot_pos_end = self.motion.getRobotPosition(False)
         real_end_position = self.Pose2D(robot_pos_end[0], robot_pos_end[1], robot_pos_end[2])
 
         # Calcul de l'erreur entre attendu et réel
-        position_error = real_end_position.diff(expected_end_position)
+        position_error = real_end_position - expected_end_position
         position_error.theta = self.modulo2PI(position_error.theta)
 
         # Vérification de l'erreur pour confirmer l'arrivée ou l'arrêt prématuré
@@ -149,30 +126,33 @@ def marcheRobot(session):
     # Initialisation des services
     motion_service = session.service("ALMotion")
     posture_service = session.service("ALRobotPosture")
-    # video_service = session.service("ALVideoDevice")  # Décommenter si besoin vidéo
 
-    # Réveil et position initiale debout
     motion_service.wakeUp()
     posture_service.goToPosture("StandInit", 1.0)
-
+    
     print("Robot prêt. Appuyez sur Ctrl+C pour arrêter.")
     try:
+        motion_service.moveToward(0.125,0.125,0.0,[["Frequency",1.0]])
         while True:
-            # Exemple simple : déplacement vers l'avant avec moveToward
-            motion_service.moveToward(0.5, 0.0, 0.0, [["Frequency", 1.0]])
-            time.sleep(5)  # Déplacement pendant 5 secondes
-            motion_service.stopMove()
-
-            time.sleep(2)  # Pause entre les commandes
-            
-            # Pour test, on boucle une seule fois
-            break
-
-    except KeyboardInterrupt:
-        print("Arrêt par l'utilisateur.")
-
-    # Nettoyage et mise en repos
-    # video_service.unsubscribe(name_id)  # Décommenter si utilisation caméra
-    # cv2.destroyAllWindows()             # Décommenter si utilisation OpenCV
-    motion_service.rest()
+            motionAlert = 0.42
+            robotMouvement = RobotMovement(motion_service)
+            pos2D = robotMouvement.Pose2D(x=0.5,y=0,theta=0)
+            _,_,theta = pos2D.toVector()
+            right, left = SonarDetection(session,motionAlert)
+            while left != -1 or right != -1 :
+                isStoped = motion_service.stopMove()
+                if  left != -1 : theta -= robotMouvement.modulo2PI(2.5)
+                else : theta += robotMouvement.modulo2PI(2.5)
+                if -1.0 < theta < 1.0 :
+                    right, left = SonarDetection(session,motionAlert)
+                    if isStoped : 
+                        motion_service.moveToward(0.005,0.005,theta,[["Frequency",0.5]])
+                        time.sleep(2)
+                        motion_service.stopMove()
+                else : break
+            if theta < -1  : theta = -1
+            elif theta > 1 : theta = 1
+            if not(motion_service.moveIsActive()) : motion_service.moveToward(0.125,0.125,0.0,[["Frequency",1.0]])
+    except Exception as e :
+        raise e
 
