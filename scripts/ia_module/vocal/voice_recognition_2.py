@@ -26,27 +26,27 @@ def voice_recognition_2(session):
     
     # Nettoyage des anciens abonnements
     try:
-        print("\n[INIT] Nettoyage des anciens abonnements ASR...")
+        print("\n Nettoyage des anciens abonnements ASR...")
         subscribers = asr.getSubscribersInfo()
         for subscriber in subscribers:
             try:
                 asr.unsubscribe(subscriber)
-                print(f"  Desabonne: {subscriber}")
+                print(f"Desabonne: {subscriber}")
             except Exception as e:
-                print(f"  Impossible de desabonner {subscriber}: {e}")
+                print(f"Impossible de desabonner {subscriber}: {e}")
     except Exception as e:
-        print(f"[WARN] Erreur lors du nettoyage: {e}")
+        print(f"Erreur lors du nettoyage: {e}")
     
     # Pause explicite du moteur ASR
     try:
         asr.pause(True)
-        print("[INIT] Moteur ASR mis en pause")
+        print("Moteur ASR mis en pause")
     except Exception as e:
-        print(f"[INFO] {e}")
+        print(f"{e}")
 
     # Configuration ASR
     asr.setLanguage("English")
-    print("[CONFIG] Langue configuree: English")
+    print("Langue configuree: English")
     
     # Vocabulaire pour le Sprint 2
     vocabulary = [
@@ -54,12 +54,11 @@ def voice_recognition_2(session):
     ]
     
     asr.setVocabulary(vocabulary, False)
-    print(f"[CONFIG] Vocabulaire charge: {', '.join(vocabulary)}")
+    print(f"Vocabulaire charge: {', '.join(vocabulary)}")
     
     # Démarrage Reconnaissance
     asr.subscribe("VoiceRecog_Sprint2")
-    print("[ACTIF] Reconnaissance vocale activee")
-    print("\n[INFO] NAO est a l'ecoute. Demandez 'Quelle couleur ?'\n")
+    print("Reconnaissance vocale activee")
     
     # Boucle d'écoute
     tts.setLanguage("English")
@@ -80,29 +79,29 @@ def voice_recognition_2(session):
             
             # Filtrer par confiance et éviter les répétitions
             if confidence > 0.4 and word != last_word:
-                print(f"\n[RECONNU] Mot: '{word}' (confiance: {confidence*100:.0f}%)")
+                print(f"\n[Reconnu] Mot: '{word}' (confiance: {confidence*100:.0f}%)")
                 
                 if word == "color":
+                    print("I hear the word color")
                     # Lire la couleur depuis ALMemory
                     couleur = memory.getData("CouleurDetectee")
                     
                     if couleur:
                         response = f"I detected {couleur}"
-                        print(f"[RESPONSE] NAO say: '{response}'")
+                        print(f"[Response] NAO say: '{response}'")
                         tts.say(response)
                     else:
                         response = "I did not detect any color"
-                        print(f"[RESPONSE] NAO say: '{response}'")
+                        print(f"[Response] NAO say: '{response}'")
                         tts.say(response)
                     
                     last_word = word
                 else:
-                    print(f"[INFO] Mot reconnu mais pas de reponse programmee pour: '{word}'")
+                    print(f"[Info] Mot reconnu mais pas de reponse programmee pour: '{word}'")
     
     # Arrêt
-    asr.unsubscribe("VoiceRecog_Sprint2")
-    print("\n[FIN] Reconnaissance vocale desactivee")
-    print("=" * 60)
+    asr.unsubscribe("voice_recognition_2")
+    print("\n[Fin]Reconnaissance vocale desactivee")
 
 
 if __name__ == "__main__":
@@ -110,7 +109,7 @@ if __name__ == "__main__":
     import sys
     
     parser = argparse.ArgumentParser()
-    parser.add_argument("--ip", type=str, default="127.0.0.1",
+    parser.add_argument("--ip", type=str, default="172.16.1.164",
                         help="Adresse IP du robot NAO")
     parser.add_argument("--port", type=int, default=9559,
                         help="Port NAOqi")
@@ -121,9 +120,9 @@ if __name__ == "__main__":
     session = qi.Session()
     try:
         session.connect("tcp://" + args.ip + ":" + str(args.port))
-        print(f"\n[CONNEXION] Connecte a NAO sur {args.ip}:{args.port}\n")
+        print(f"\nConnecte a NAO sur {args.ip}:{args.port}\n")
     except RuntimeError:
-        print(f"\n[ERREUR] Impossible de se connecter a NAO sur {args.ip}:{args.port}")
+        print(f"\nImpossible de se connecter a NAO sur {args.ip}:{args.port}")
         print("Verifiez que:")
         print("  - Le simulateur NAOqi est lance (si en local)")
         print("  - L'adresse IP et le port sont corrects")

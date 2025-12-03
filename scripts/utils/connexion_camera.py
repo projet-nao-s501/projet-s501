@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 from scripts.ia_module.traitement_image import detectionRouge, detecter_couleur
+from scripts.ia_module.vocal.voice_recognition_2 import voice_recognition_2
 
 # Ajouts faits par Junior pour
 # l'intégration de la détection vocale.
@@ -73,15 +74,9 @@ def connexionCamera(session):
             memory.insertData("CouleurDetectee", couleur_detectee)
             print(f"[INFO] Couleur détectée et stockée : {couleur_detectee}")
             
-            # Annoncer uniquement si c'est une 
-            # nouvelle couleur (évite 
-            # de répéter "J'ai détecté 
-            # une couleur" à chaque 
-            # frame)
-            if couleur_detectee != derniere_couleur_annoncee:
-                tts.say("I detected a color")
-                print(f"[VOCAL] NAO annonce : 'I detected a color'")
-                derniere_couleur_annoncee = couleur_detectee
+            # Annoncer à CHAQUE détection
+            tts.say("I detected a color")
+            print(f"[VOCAL] NAO annonce : 'I detected a color'")
         else:
             # Aucune couleur détectée : réinitialiser
             memory.insertData("CouleurDetectee", None)

@@ -40,8 +40,8 @@ def lancer_reconnaissance_vocale(session):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--ip", type=str, default="127.0.0.1",
-                        help="Robot IP address. On robot or Local Naoqi: use '127.0.0.1'.")
+    parser.add_argument("--ip", type=str, default="172.16.1.164",
+                        help="Robot IP address. On robot or Local Naoqi: use '172.16.1.164'.")
     parser.add_argument("--port", type=int, default=9559,
                         help="Naoqi port number")
 
@@ -62,15 +62,15 @@ if __name__ == "__main__":
     thread_detection.start()
     thread_vocal.start()
 
-    print("[Main] Les deux modules sont lances")
-    print("[Main] Appuyez sur 'q' dans la fenetre de detection pour arreter\n")
+    print("Les deux modules sont lances")
+    print("Appuyez sur 'q' dans la fenetre de detection pour arreter\n")
 
     # Attendre que les threads se terminent
     try:
         thread_detection.join()
         thread_vocal.join()
     except KeyboardInterrupt:
-        print("\n[Main] Arret demande par l'utilisateur (Ctrl+C)")
+        print("\n Arret demande par l'utilisateur (Ctrl+C)")
 
     
 
