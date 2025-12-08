@@ -1,12 +1,8 @@
 import cv2
 import numpy as np
-<<<<<<< HEAD
 from scripts.ia_module.traitement_image import detectionRouge
 from scripts.traitement_vetement_fonction import visualiser_dataset
-
-=======
 from scripts.ia_module.detection_couleurs import detection_couleurs_Camera
->>>>>>> 7577fc18e3ebe87bb65d3de6ee7167ac1ac18d48
 
 def connexionCamera(session):
     video_service = session.service("ALVideoDevice")
@@ -45,16 +41,13 @@ def connexionCamera(session):
         img = np.frombuffer(array, dtype=np.uint8).reshape((height, width, 3))
 
         img2 = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
-<<<<<<< HEAD
         result = detectionRouge(img2)
 
         # fonction sur IA 
         result_yolo = visualiser_dataset(img2)
 
 
-=======
         result = detection_couleurs_Camera(img2)
->>>>>>> 7577fc18e3ebe87bb65d3de6ee7167ac1ac18d48
         
         cv2.imshow("Detection du rouge", result)
 
