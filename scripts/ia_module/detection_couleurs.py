@@ -35,5 +35,5 @@ def detection_couleurs_Camera(frame):
         2
     )
 
-    # Retourne l’image annotée + la liste des couleurs détectées
-    return frame, detected_colors
+    # Retourne l’image annotée 
+    return frame
