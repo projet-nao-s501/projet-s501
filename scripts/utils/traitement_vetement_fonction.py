@@ -1,0 +1,26 @@
+from ultralytics import YOLO
+import cv2
+
+# Charger le modèle YOLOv8 
+model = YOLO("scripts/ia_module/best.pt")
+
+def visualiser_dataset(image_data):
+    
+    # Détection YOLO sur l'image
+    results = model(image_data, conf=0.8)
+    
+    # Tracer les boîtes de détection
+    frame_box = results[0].plot()
+    
+    # Redimensionner l'image
+    frame_box = cv2.resize(frame_box, (900, 900))
+    
+    return frame_box
+   
+
+image = cv2.imread("scripts/utils/Friend_group.jpg")
+result = visualiser_dataset(image)
+
+cv2.imshow("Resultat du model best.pt", result)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
