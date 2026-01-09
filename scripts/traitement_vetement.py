@@ -2,7 +2,7 @@ from ultralytics import YOLO
 import cv2
 
 # Charger le modèle YOLOv8 une seule fois
-model = YOLO("model/best.pt")
+model = YOLO("scripts/ia_module/best.pt")
 # model = YOLO("yolov8m.pt")
 
 cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
