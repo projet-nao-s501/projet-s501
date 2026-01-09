@@ -26,14 +26,17 @@ def detection_couleurs_Camera(frame):
     text = " | ".join(set(detected_colors)) if detected_colors else "Aucune couleur détectée"
 
     # Écriture sur l’image
-    cv2.putText(
-        frame, text,
-        (10, 30),
-        cv2.FONT_HERSHEY_SIMPLEX,
-        1,
-        (255,255,255),
-        2
-    )
+    x, y = 10, 30
+    line_h = 25
+    max_per_line = 4
+
+    for i in range(0, len(detected_colors), max_per_line):
+        line = " | ".join(detected_colors[i:i+max_per_line])
+        cv2.putText(frame, line, (x, y),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1)
+        y += line_h
+
+
 
     # Retourne l’image annotée 
     return frame
