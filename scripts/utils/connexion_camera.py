@@ -24,7 +24,8 @@ def connexionCamera(session):
     memory = session.service("ALMemory") 
     # Pour parler
     tts = session.service("ALTextToSpeech")
-    tts.setLanguage("English") # config en français
+    asr = session.service("ALSpeechRecognition")
+    tts.setLanguage("French") # config en français
 
     # Camera settings
     resolution = 1  # VGA (640x480)
@@ -75,8 +76,8 @@ def connexionCamera(session):
             print(f"[INFO] Couleur détectée et stockée : {couleur_detectee}")
             
             # Annoncer à CHAQUE détection
-            tts.say("I detected a color")
-            print(f"[VOCAL] NAO annonce : 'I detected a color'")
+            tts.say("Je détecte une couleur")
+            print(f"[VOCAL] NAO annonce : 'J'ai detecté une couleur'")
         else:
             # Aucune couleur détectée : réinitialiser
             memory.insertData("CouleurDetectee", None)

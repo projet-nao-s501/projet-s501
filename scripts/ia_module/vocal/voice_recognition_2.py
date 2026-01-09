@@ -61,7 +61,7 @@ def voice_recognition_2(session):
     print("Reconnaissance vocale activee")
     
     # Boucle d'écoute
-    tts.setLanguage("English")
+    tts.setLanguage("French")
     last_word = ""
     iteration = 0
     max_iterations = 200  # Environ 100 secondes (200 x 0.5s)
@@ -81,17 +81,17 @@ def voice_recognition_2(session):
             if confidence > 0.4 and word != last_word:
                 print(f"\n[Reconnu] Mot: '{word}' (confiance: {confidence*100:.0f}%)")
                 
-                if word == "color":
+                if word == "couleur":
                     print("I hear the word color")
                     # Lire la couleur depuis ALMemory
                     couleur = memory.getData("CouleurDetectee")
                     
                     if couleur:
-                        response = f"I detected {couleur}"
+                        response = f"J'ai detecté du {couleur}"
                         print(f"[Response] NAO say: '{response}'")
                         tts.say(response)
                     else:
-                        response = "I did not detect any color"
+                        response = "Je n'ai pas detecté une couleur"
                         print(f"[Response] NAO say: '{response}'")
                         tts.say(response)
                     

@@ -54,7 +54,10 @@ def voice_recognition_sprint1(session):
         "merci",
         "moi",
         "qui est junior ?",
-        "au revoir"
+        "au revoir",
+        "ludivine",
+        "islem",
+        "pull rouge"
     ]
     
     asr.setVocabulary(vocabulary, False)
@@ -73,7 +76,10 @@ def voice_recognition_sprint1(session):
         "merci": "Tu as encore besoin d'une information ?",
         "moi": "Lamaro Salif Junior, jeune homme portant des lunettes et qui se trouve actuellement trop proche de mon oreille. Peux-tu te décaler s'il te plait ?",
         "qui est junior ?": "Lamaro Salif Junior, jeune homme portant des lunettes et qui se trouve actuellement trop proche de mon oreille. Peux-tu te décaler s'il te plait ?",
-        "au revoir": "Bonne journée Junior"
+        "au revoir": "Bonne journée Junior",
+        "ludivine" : "Test de Ludivine",
+        "islem" : "Islem la plus belle.",
+        "pull rouge" : "papa Noel."
     }
     
     # Boucle d'écoute (60 secondes = 120 itérations x 0.5s)
@@ -135,7 +141,7 @@ if __name__ == "__main__":
     import sys
     
     parser = argparse.ArgumentParser()
-    parser.add_argument("--ip", type=str, default="172.16.1.164",
+    parser.add_argument("--ip", type=str, default="172.16.1.163",
                         help="Adresse IP du robot NAO")
     parser.add_argument("--port", type=int, default=9559,
                         help="Port NAOqi")
