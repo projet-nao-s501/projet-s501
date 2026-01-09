@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-from scripts.ia_module.traitement_image import detectionRouge
+from scripts.ia_module.detection_formes import detection_formes
 
 def connexionCamera(session):
     video_service = session.service("ALVideoDevice")
@@ -38,8 +38,7 @@ def connexionCamera(session):
         array = image[6]
         img = np.frombuffer(array, dtype=np.uint8).reshape((height, width, 3))
 
-        img2 = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
-        result = detectionRouge(img2)
+        result = detection_formes(img)
         
         cv2.imshow("Detection du rouge", result)
         
