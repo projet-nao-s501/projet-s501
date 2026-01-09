@@ -1,9 +1,8 @@
-import cv2
 import os
-import requests
 from ultralytics import YOLO
 
-MODEL_FILENAME = "deepfashion2_yolov8s-seg.pt"
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_FILENAME = os.path.join(SCRIPT_DIR, "deepfashion2_yolov8s-seg.pt")
 
 def detection_formes(frame):
     model = YOLO(MODEL_FILENAME)
