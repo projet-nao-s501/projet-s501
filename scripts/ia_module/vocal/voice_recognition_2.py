@@ -10,7 +10,7 @@
 import time
 import qi
 
-def voice_recognition_2(session):
+def voice_recognition_2(session, couleur_detectee):
     """
     - Écoute la question "Quelle couleur ?"
     - Lit la couleur détectée dans ALMemory 
@@ -45,12 +45,12 @@ def voice_recognition_2(session):
         print(f"{e}")
 
     # Configuration ASR
-    asr.setLanguage("English")
-    print("Langue configuree: English")
+    asr.setLanguage("French")
+    print("Langue configuree: French")
     
     # Vocabulaire pour le Sprint 2
     vocabulary = [
-        "color"
+        "couleur"
     ]
     
     asr.setVocabulary(vocabulary, False)
@@ -84,7 +84,8 @@ def voice_recognition_2(session):
                 if word == "couleur":
                     print("I hear the word color")
                     # Lire la couleur depuis ALMemory
-                    couleur = memory.getData("CouleurDetectee")
+                    # couleur = memory.getData("CouleurDetectee")
+                    couleur = couleur_detectee
                     
                     if couleur:
                         response = f"J'ai detecté du {couleur}"

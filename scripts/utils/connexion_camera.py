@@ -78,6 +78,8 @@ def connexionCamera(session):
             # Annoncer à CHAQUE détection
             tts.say("Je détecte une couleur")
             print(f"[VOCAL] NAO annonce : 'J'ai detecté une couleur'")
+
+            voice_recognition_2(session, couleur_detectee)
         else:
             # Aucune couleur détectée : réinitialiser
             memory.insertData("CouleurDetectee", None)
