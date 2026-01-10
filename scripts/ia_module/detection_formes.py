@@ -22,48 +22,33 @@ def extraire_segment(frame, mask, box):
     
     return crop_detoure
 
-def detection_formes():
-    cap = cv2.VideoCapture(0)
-    
+def detection_formes():    
     dernier_temps_print = 0 
 
-    while True:
-        ret, frame = cap.read()
-        if not ret: break
+    results = model.predict(source=frame, conf=0.4, verbose=False)
 
-        results = model.predict(source=frame, conf=0.4, verbose=False)
+    infos_a_afficher = []
+
+    for r in results:
+        annotated_frame = r.plot() 
+
+        if r.masks is not None:
+            for i, (mask, box) in enumerate(zip(r.masks, r.boxes)):
+                label = model.names[int(box.cls[0])]
+                obj_id = f"{label}_{i}"
+                
+                vêtement_seul = extraire_segment(frame, mask, box)
+
+                if vêtement_seul.size > 0:
+                    couleur = detection_couleurs(vêtement_seul)
+                    infos_a_afficher.append(f"{label}: {couleur}")
+
+    temps_actuel = time.time()
+
+    if temps_actuel - dernier_temps_print >= 1.0:
+        if infos_a_afficher:
+            print(f" | ".join(infos_a_afficher))
         
-        infos_a_afficher = []
+        dernier_temps_print = temps_actuel
 
-        for r in results:
-            annotated_frame = r.plot() 
-
-            if r.masks is not None:
-                for i, (mask, box) in enumerate(zip(r.masks, r.boxes)):
-                    label = model.names[int(box.cls[0])]
-                    obj_id = f"{label}_{i}"
-                    
-                    vêtement_seul = extraire_segment(frame, mask, box)
-
-                    if vêtement_seul.size > 0:
-                        couleur = detection_couleurs(vêtement_seul)
-                        infos_a_afficher.append(f"{label}: {couleur}")
-
-        temps_actuel = time.time()
-        
-        if temps_actuel - dernier_temps_print >= 1.0:
-            if infos_a_afficher:
-                print(f" | ".join(infos_a_afficher))
-            
-            dernier_temps_print = temps_actuel
-
-        cv2.imshow("IA Segmentation Fashion", annotated_frame)
-
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-
-    cap.release()
-    cv2.destroyAllWindows()
-
-if __name__ == "__main__":
-    detection_formes()
+    cv2.imshow("IA Segmentation Fashion", annotated_frame)
