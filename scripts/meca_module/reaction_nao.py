@@ -196,21 +196,38 @@ def checker(session):
     posture = session.service("ALRobotPosture")
     tts = session.service("ALTextToSpeech")
 
+    # Réveil + posture correcte
     motion.wakeUp()
+    posture.goToPosture("StandInit", 0.6)
+    time.sleep(0.5)
 
-    names = ["RShoulderPitch", "RShoulderRoll", "RElbowYaw", "RElbowRoll"]
-    angles = [-0.5, -0.2, 1.5, 0.5]
+    # Mouvement bras droit (check)
+    names = [
+        "RShoulderPitch",
+        "RShoulderRoll",
+        "RElbowYaw",
+        "RElbowRoll"
+    ]
+
+    angles = [
+        -0.5,   # Bras en avant
+        -0.3,   # Ouvert sur le côté
+        1.4,    # Orientation coude
+        0.5     # Bras légèrement plié
+    ]
 
     motion.setAngles(names, angles, 0.4)
-    time.sleep(1)
+    time.sleep(0.8)
 
+    # Main ouverte puis fermée
     motion.openHand("RHand")
-    time.sleep(0.5)
+    time.sleep(0.4)
     motion.closeHand("RHand")
 
     # Parole
-    tts.say("Salut ça va, chèque mois ça !")
+    tts.say("Salut, ça va ? Checke-moi ça !")
 
+    # Retour posture neutre
     posture.goToPosture("StandInit", 0.5)
 
 
