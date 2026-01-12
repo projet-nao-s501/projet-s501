@@ -196,6 +196,8 @@ def checker(session):
     posture = session.service("ALRobotPosture")
     tts = session.service("ALTextToSpeech")
 
+    motion.wakeUp()
+
     names = ["RShoulderPitch", "RShoulderRoll", "RElbowYaw", "RElbowRoll"]
     angles = [-0.5, -0.2, 1.5, 0.5]
 
