@@ -153,25 +153,32 @@ def naoDab(session):
     posture.goToPosture("StandInit", 0.5)
 
 
+import time
+
 def sad(session):
 
     motion = session.service("ALMotion")
+    posture = session.service("ALRobotPosture")
+
+    motion.wakeUp()
+    posture.goToPosture("StandInit", 0.5)
 
     names = [
-        "HipPitch",
+        "RHipYawPitch", "LHipYawPitch",
         "LShoulderPitch", "RShoulderPitch",
         "LShoulderRoll", "RShoulderRoll",
         "HeadPitch"
     ]
 
     angles = [
-        0.2,      # Torse vers l'avant
-        1.5, 1.5, # Bras vers le bas
-        0.1, -0.1,
-        0.4       # Tête baissée
+        -0.2, -0.2,     # Torse légèrement penché vers l'avant
+        1.4, 1.4,       # Bras tombants
+        0.15, -0.15,    # Épaules relâchées
+        0.4             # Tête baissée
     ]
 
     motion.setAngles(names, angles, 0.2)
     time.sleep(2)
+
 
 
