@@ -3,59 +3,6 @@ import time
 import numpy as np
 from spatialmath import SE3
 
-# def naoDanse(session):
-#     motion = session.service("ALMotion")
-#     posture = session.service("ALRobotPosture")
-
-#     motion.wakeUp()
-#     posture.goToPosture("StandInit", 0.5)
-
-#     # Paramètres pour la danse
-#     for _ in range(5):
-
-#         # Étape 1 : Hanche gauche + bras gauche haut / bras droit bas
-#         names = [
-#             "LHipRoll", "RHipRoll",
-#             "LShoulderPitch", "RShoulderPitch",
-#             "LShoulderRoll", "RShoulderRoll",
-#             "LElbowRoll", "RElbowRoll",
-#             "HeadYaw", "HeadPitch"
-#         ]
-#         angles = [
-#             0.2, -0.2,       # Hanches
-#             0.5, 0.2,        # Bras (gauche haut, droit bas)
-#             0.3, -0.3,       # Épaules latérales
-#             -0.5, 0.5,       # Coudes pliés
-#             0.0, 0.1         # Tête légèrement droite
-#         ]
-#         motion.setAngles(names, angles, 0.3)
-#         time.sleep(0.5)
-
-#         # Étape 2 : Hanche droite + bras droit haut / bras gauche bas
-#         angles = [
-#             -0.2, 0.2,       # Hanches
-#             0.2, 0.5,        # Bras (droite haut, gauche bas)
-#             -0.3, 0.3,       # Épaules latérales
-#             0.5, -0.5,       # Coudes pliés
-#             0.0, -0.1        # Tête légèrement gauche
-#         ]
-#         motion.setAngles(names, angles, 0.3)
-#         time.sleep(0.5)
-
-#         # Étape 3 : Hanche centrale + bras en mouvement intermédiaire
-#         angles = [
-#             0.0, 0.0,
-#             0.3, 0.3,
-#             0.0, 0.0,
-#             0.0, 0.0,
-#             0.0, 0.0
-#         ]
-#         motion.setAngles(names, angles, 0.3)
-#         time.sleep(0.3)
-
-#     # Retour à posture initiale
-#     posture.goToPosture("StandInit", 0.5)
-
 def offset_tf(original_tf, x_off=0.0, y_off=0.0, z_off=0.0):
     new_tf = list(original_tf)
     new_tf[3]  += x_off
@@ -70,38 +17,32 @@ def naoDanse(session):
     motion.wakeUp()
     posture.goToPosture("StandInit", 0.5)
 
-    # Enable Whole Body Balancer
     motion.wbEnable(True)
     motion.wbFootState("Fixed", "Legs")
     motion.wbEnableBalanceConstraint(True, "Legs")
 
     useSensorValues = False
-    frame = 2 # FRAME_ROBOT
+    frame = 2 
     effectorList = ["LArm", "RArm"]
 
-    # --- LArm Path Generation ---
     current_tf_l = motion.getTransform("LArm", frame, useSensorValues)
     
-    # target1: y + 0.08, z + 0.14
     target1_l = offset_tf(current_tf_l, y_off=0.08, z_off=0.14)
-    # target2: y - 0.05, z - 0.07
+
     target2_l = offset_tf(current_tf_l, y_off=-0.05, z_off=-0.07)
 
     pathLArm = [target1_l, target2_l, target1_l, target2_l, target1_l]
 
-    # --- RArm Path Generation ---
     current_tf_r = motion.getTransform("RArm", frame, useSensorValues)
     
-    # target1: y + 0.05, z - 0.07
     target1_r = offset_tf(current_tf_r, y_off=0.05, z_off=-0.07)
-    # target2: y - 0.08, z + 0.14
+
     target2_r = offset_tf(current_tf_r, y_off=-0.08, z_off=0.14)
 
     pathRArm = [target1_r, target2_r, target1_r, target2_r, target1_r, target2_r]
 
-    # --- Execution ---
     pathList = [pathLArm, pathRArm]
-    axisMaskList = [63, 63] # Translation + Rotation
+    axisMaskList = [63, 63]
 
     coef = 1.5
     timesList = [
@@ -166,11 +107,9 @@ def sad(session):
 
     motion.wakeUp()
 
-    # NAO s'assoit
     posture.goToPosture("Sit", 0.5)
     time.sleep(1)
 
-    # Penche un peu plus en avant
     names = [
         "HeadPitch",
         "LKneePitch", "RKneePitch", 
@@ -186,7 +125,6 @@ def sad(session):
     motion.setAngles(names, angles, 0.2)
     time.sleep(0.5)
 
-    # Parole
     tts.say("Ouin ouin, j'ai pas trouvé.")
 
 
@@ -196,12 +134,10 @@ def checker(session):
     posture = session.service("ALRobotPosture")
     tts = session.service("ALTextToSpeech")
 
-    # Réveil + posture correcte
     motion.wakeUp()
     posture.goToPosture("StandInit", 0.6)
     time.sleep(0.5)
 
-    # Mouvement bras droit (check)
     names = [
         "RShoulderPitch",
         "RShoulderRoll",
@@ -219,15 +155,12 @@ def checker(session):
     motion.setAngles(names, angles, 0.4)
     time.sleep(0.8)
 
-    # Main ouverte puis fermée
     motion.openHand("RHand")
     time.sleep(0.4)
     motion.closeHand("RHand")
 
-    # Parole
     tts.say("Salut, ça va ? Checke-moi ça !")
 
-    # Retour posture neutre
     posture.goToPosture("StandInit", 0.5)
 
 
