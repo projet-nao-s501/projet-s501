@@ -49,7 +49,7 @@ def naoDab(session):
     ]
 
     angles = [
-        -0.3,  -0.6,  1.2,     # Bras droit plié devant la tête vers la gauche
+        -0.8,  -0.6,  1.2,     # Bras droit plié devant la tête vers la gauche
         0.2,   0.8,  0.0,     # Bras gauche tendu vers la gauche
         0.6,   0.4             # Tête tournée et inclinée vers la gauche
     ]
