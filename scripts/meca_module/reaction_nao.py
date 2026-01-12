@@ -155,11 +155,12 @@ def checker(session):
     motion.setAngles(names, angles, 0.4)
     time.sleep(0.8)
 
+    tts.say("Checke-moi ça !")
+    
     motion.openHand("RHand")
-    time.sleep(0.4)
+    time.sleep(1)
     motion.closeHand("RHand")
 
-    tts.say("Salut, ça va ? Checke-moi ça !")
 
     posture.goToPosture("StandInit", 0.5)
 
