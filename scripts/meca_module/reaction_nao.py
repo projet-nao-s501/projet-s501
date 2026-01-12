@@ -172,15 +172,15 @@ def sad(session):
 
     # Penche un peu plus en avant
     names = [
-        "HeadPitch",
-        "KneePitch",
-        "AnklePitch"
+        "LHeadPitch", "RHeadPitch",
+        "LKneePitch", "RKneePitch", 
+        "LAnklePitch", "RAnklePitch"
     ]
 
     angles = [
-        0.65,   # Tête plus baissée
-        0.2,    # Légère flexion des genoux
-        -0.05   # Légère compensation chevilles
+        0.65, 0.65,   # Tête plus baissée
+        0.2, 0.2,     # Légère flexion des genoux
+        -0.05, -0.05  # Légère compensation chevilles
     ]
 
     motion.setAngles(names, angles, 0.2)
