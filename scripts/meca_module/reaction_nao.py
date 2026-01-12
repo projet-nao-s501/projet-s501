@@ -219,13 +219,14 @@ def checker(session):
     motion.setAngles(names, angles, 0.4)
     time.sleep(0.8)
 
+    # Parole
+    tts.say("Checke-moi ça !")
+
     # Main ouverte puis fermée
     motion.openHand("RHand")
-    time.sleep(0.4)
+    time.sleep(1)
     motion.closeHand("RHand")
 
-    # Parole
-    tts.say("Salut, ça va ? Checke-moi ça !")
 
     # Retour posture neutre
     posture.goToPosture("StandInit", 0.5)
