@@ -43,13 +43,13 @@ def naoDab(session):
     posture.goToPosture("StandInit", 0.5)
     
     names = [
-        "RShoulderPitch", "RShoulderRoll", "RElbowRoll", "RElBowYaw",
+        "RShoulderPitch", "RShoulderRoll", "RElbowRoll", "RElbowYaw",
         "LShoulderPitch", "LShoulderRoll", "LElbowRoll",
         "HeadYaw", "HeadPitch"
     ]
 
     angles = [
-        -0.5,  0.0,  1.5, -0.5    # Bras droit plié devant la tête vers la gauche
+        -0.5,  0.0,  1.5, -0.5,    # Bras droit plié devant la tête vers la gauche
         -0.2,   0.8,  0.0,     # Bras gauche tendu vers la gauche
         -0.6, -0.4             # Tête tournée et inclinée vers la droite
     ]
@@ -58,7 +58,7 @@ def naoDab(session):
     time.sleep(1)
 
     names = [
-        "LShoulderPitch", "LShoulderRoll", "LElbowRoll", "LElBowYaw",
+        "LShoulderPitch", "LShoulderRoll", "LElbowRoll", "LElbowYaw",
         "RShoulderPitch", "RShoulderRoll", "RElbowRoll",
         "HeadYaw", "HeadPitch"
     ]
