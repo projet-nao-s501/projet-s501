@@ -155,25 +155,40 @@ def naoDab(session):
 
 import time
 
+import qi
+import time
+
 def sad(session):
 
     motion = session.service("ALMotion")
     posture = session.service("ALRobotPosture")
     tts = session.service("ALTextToSpeech")
 
-    # Réveil
     motion.wakeUp()
 
     # NAO s'assoit
     posture.goToPosture("Sit", 0.5)
     time.sleep(1)
 
-    # Tête penchée vers l'avant (tristesse)
-    motion.setAngles("HeadPitch", 0.5, 0.2)
+    # Penche un peu plus en avant
+    names = [
+        "HeadPitch",
+        "KneePitch",
+        "AnklePitch"
+    ]
+
+    angles = [
+        0.65,   # Tête plus baissée
+        0.2,    # Légère flexion des genoux
+        -0.05   # Légère compensation chevilles
+    ]
+
+    motion.setAngles(names, angles, 0.2)
     time.sleep(0.5)
 
     # Parole
     tts.say("Ouin ouin, j'ai pas trouvé.")
+
 
 
 
