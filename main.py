@@ -4,10 +4,10 @@ import qi
 import argparse
 import sys
 import time
-from scripts.meca_module.reaction_nao import naoDab, naoDanse, sad
+from scripts.meca_module.reaction_nao import naoDab, naoDanse, sad, checker
 
 def main(session, args) :
-    sad(session)
+    checker(session)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Contrôle du robot NAO.")
