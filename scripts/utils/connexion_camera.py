@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
-from scripts.ia_module.detection_formes import detection_formes
+from scripts.utils.traitement_vetement_fonction import detection_and_classification_webcam
+
 
 def connexionCamera(session):
     video_service = session.service("ALVideoDevice")
@@ -38,11 +39,9 @@ def connexionCamera(session):
         array = image[6]
         img = np.frombuffer(array, dtype=np.uint8).reshape((height, width, 3))
 
-        result = detection_formes(img)
-        
-        cv2.imshow("Detection du rouge", result)
-        
-        img = cv2.resize(img, (224, 224), interpolation=cv2.INTER_AREA)
+        result = detection_and_classification_webcam(img)
+        cv2.namedWindow("Fusion des deux modèles", cv2.WINDOW_NORMAL)
+        cv2.imshow("Fusion des deux modèles", result)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break

@@ -18,7 +18,7 @@ def visualiser_dataset(image_data):
     return frame_box
    
 
-image = cv2.imread("scripts/utils/Friend_group.jpg")
+image = cv2.imread("scripts/utils/images/fille_short.jpg")
 result = visualiser_dataset(image)
 
 cv2.imshow("Resultat du model best.pt", result)
