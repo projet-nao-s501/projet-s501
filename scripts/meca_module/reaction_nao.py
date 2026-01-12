@@ -49,9 +49,9 @@ def naoDab(session):
     ]
 
     angles = [
-        -0.4, -0.3, 1.0,     # Bras droit (plié, horizontal)
-        1.2,  0.6, -0.6,     # Bras gauche (vers le bas)
-        0.6,  0.4            # Tête tournée vers la gauche
+        -0.3,  -0.6,  1.2,     # Bras droit plié devant la tête vers la gauche
+        0.2,   0.8,  0.0,     # Bras gauche tendu vers la gauche
+        0.6,   0.4             # Tête tournée et inclinée vers la gauche
     ]
 
     motion.setAngles(names, angles, 0.4)
