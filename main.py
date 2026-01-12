@@ -7,8 +7,6 @@ import time
 from scripts.meca_module.reaction_nao import naoDab, naoDanse
 
 def main(session, args) :
-    naoDab(session)
-    time.sleep(0.5)
     naoDanse(session)
 
 if __name__ == "__main__":

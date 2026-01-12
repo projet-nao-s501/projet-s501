@@ -1,6 +1,7 @@
 import qi
 import time
-import almath
+import numpy as np
+from spatialmath import SE3
 
 # def naoDanse(session):
 #     motion = session.service("ALMotion")
@@ -55,6 +56,13 @@ import almath
 #     # Retour à posture initiale
 #     posture.goToPosture("StandInit", 0.5)
 
+def offset_tf(original_tf, x_off=0.0, y_off=0.0, z_off=0.0):
+    new_tf = list(original_tf)
+    new_tf[3]  += x_off
+    new_tf[7]  += y_off
+    new_tf[11] += z_off
+    return new_tf
+
 def naoDanse(session):
     motion = session.service("ALMotion")
     posture = session.service("ALRobotPosture")
@@ -62,77 +70,48 @@ def naoDanse(session):
     motion.wakeUp()
     posture.goToPosture("StandInit", 0.5)
 
-     # Enable Whole Body Balancer
-    isEnabled  = True
-    motion.wbEnable(isEnabled)
-
-    # Legs are constrained fixed
-    stateName  = "Fixed"
-    supportLeg = "Legs"
-    motion.wbFootState(stateName, supportLeg)
-
-    # Constraint Balance Motion
-    isEnable   = True
-    supportLeg = "Legs"
-    motion.wbEnableBalanceConstraint(isEnable, supportLeg)
+    # Enable Whole Body Balancer
+    motion.wbEnable(True)
+    motion.wbFootState("Fixed", "Legs")
+    motion.wbEnableBalanceConstraint(True, "Legs")
 
     useSensorValues = False
-
-    # Arms motion
+    frame = 2 # FRAME_ROBOT
     effectorList = ["LArm", "RArm"]
 
-    frame = motion.FRAME_ROBOT
+    # --- LArm Path Generation ---
+    current_tf_l = motion.getTransform("LArm", frame, useSensorValues)
+    
+    # target1: y + 0.08, z + 0.14
+    target1_l = offset_tf(current_tf_l, y_off=0.08, z_off=0.14)
+    # target2: y - 0.05, z - 0.07
+    target2_l = offset_tf(current_tf_l, y_off=-0.05, z_off=-0.07)
 
-    # pathLArm
-    pathLArm = []
-    currentTf = motion.getTransform("LArm", frame, useSensorValues)
-    # 1
-    target1Tf  = almath.Transform(currentTf)
-    target1Tf.r2_c4 += 0.08 # y
-    target1Tf.r3_c4 += 0.14 # z
+    pathLArm = [target1_l, target2_l, target1_l, target2_l, target1_l]
 
-    # 2
-    target2Tf  = almath.Transform(currentTf)
-    target2Tf.r2_c4 -= 0.05 # y
-    target2Tf.r3_c4 -= 0.07 # z
+    # --- RArm Path Generation ---
+    current_tf_r = motion.getTransform("RArm", frame, useSensorValues)
+    
+    # target1: y + 0.05, z - 0.07
+    target1_r = offset_tf(current_tf_r, y_off=0.05, z_off=-0.07)
+    # target2: y - 0.08, z + 0.14
+    target2_r = offset_tf(current_tf_r, y_off=-0.08, z_off=0.14)
 
-    pathLArm.append(list(target1Tf.toVector()))
-    pathLArm.append(list(target2Tf.toVector()))
-    pathLArm.append(list(target1Tf.toVector()))
-    pathLArm.append(list(target2Tf.toVector()))
-    pathLArm.append(list(target1Tf.toVector()))
+    pathRArm = [target1_r, target2_r, target1_r, target2_r, target1_r, target2_r]
 
-    # pathRArm
-    pathRArm = []
-    currentTf = motion.getTransform("RArm", frame, useSensorValues)
-    # 1
-    target1Tf  = almath.Transform(currentTf)
-    target1Tf.r2_c4 += 0.05 # y
-    target1Tf.r3_c4 -= 0.07 # z
-
-    # 2
-    target2Tf  = almath.Transform(currentTf)
-    target2Tf.r2_c4 -= 0.08 # y
-    target2Tf.r3_c4 += 0.14 # z
-
-    pathRArm.append(list(target1Tf.toVector()))
-    pathRArm.append(list(target2Tf.toVector()))
-    pathRArm.append(list(target1Tf.toVector()))
-    pathRArm.append(list(target2Tf.toVector()))
-    pathRArm.append(list(target1Tf.toVector()))
-    pathRArm.append(list(target2Tf.toVector()))
-
+    # --- Execution ---
     pathList = [pathLArm, pathRArm]
+    axisMaskList = [63, 63] # Translation + Rotation
 
-    axisMaskList = [almath.AXIS_MASK_VEL, # for "LArm"
-                    almath.AXIS_MASK_VEL] # for "RArm"
+    coef = 1.5
+    timesList = [
+        [coef * (i + 1) for i in range(5)], 
+        [coef * (i + 1) for i in range(6)]
+    ]
 
-    coef       = 1.5
-    timesList  = [ [coef*(i+1) for i in range(5)],  # for "LArm" in seconds
-                   [coef*(i+1) for i in range(6)] ] # for "RArm" in seconds
-
-    # called cartesian interpolation
     motion.transformInterpolations(effectorList, frame, pathList, axisMaskList, timesList)
+
+    posture.goToPosture("StandInit", 0.5)
 
 def naoDab(session):
 
