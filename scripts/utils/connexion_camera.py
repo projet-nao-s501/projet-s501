@@ -6,7 +6,7 @@ def connexionCamera(session):
     video_service = session.service("ALVideoDevice")
     # Camera settings
     resolution = 1  # VGA (640x480)
-    color_space = 11  # RGB
+    color_space = 13  # RGB
     fps = 30
     camera_index = 1  # Use 0 or 1 depending on which one works
 
@@ -36,13 +36,10 @@ def connexionCamera(session):
 
         width, height = image[0], image[1]
         array = image[6]
+
         img = np.frombuffer(array, dtype=np.uint8).reshape((height, width, 3))
 
-        result = detection_formes(img)
-        
-        cv2.imshow("Detection du rouge", result)
-        
-        img = cv2.resize(img, (224, 224), interpolation=cv2.INTER_AREA)
+        detection_formes(img)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
