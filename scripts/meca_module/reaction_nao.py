@@ -43,15 +43,15 @@ def naoDab(session):
     posture.goToPosture("StandInit", 0.5)
     
     names = [
-    "RShoulderPitch", "RShoulderRoll", "RElbowRoll",
-    "LShoulderPitch", "LShoulderRoll", "LElbowRoll",
-    "HeadYaw", "HeadPitch"
+        "RShoulderPitch", "RShoulderRoll", "RElbowRoll",
+        "LShoulderPitch", "LShoulderRoll", "LElbowRoll",
+        "HeadYaw", "HeadPitch"
     ]
 
     angles = [
-    -0.3, -0.8, 1.0,      # Bras droit levé à droite
-    1.3,  0.4, -0.5,      # Bras gauche vers le bas
-    -0.6, 0.4             # Tête orientée à droite
+        -0.4, -0.3, 1.0,     # Bras droit (plié, horizontal)
+        1.2,  0.6, -0.6,     # Bras gauche (vers le bas)
+        0.6,  0.4            # Tête tournée vers la gauche
     ]
 
     motion.setAngles(names, angles, 0.4)
