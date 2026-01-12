@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-from scripts.utils.traitement_vetement_fonction import detection_and_classification_webcam
+from scripts.utils.fusion_model import detection_and_classification_webcam
 
 
 def connexionCamera(session):
@@ -39,9 +39,7 @@ def connexionCamera(session):
         array = image[6]
         img = np.frombuffer(array, dtype=np.uint8).reshape((height, width, 3))
 
-        result = detection_and_classification_webcam(img)
-        cv2.namedWindow("Fusion des deux modèles", cv2.WINDOW_NORMAL)
-        cv2.imshow("Fusion des deux modèles", result)
+        detection_and_classification_webcam(img)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break

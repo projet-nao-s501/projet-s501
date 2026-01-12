@@ -54,7 +54,7 @@ model_classify = YOLO("scripts/ia_module/deepfashion2_yolov8s-seg.pt")
 # version webcam --------------------------------------------------------------
 
 def detection_and_classification_webcam(frame):
-
+    cv2.imshow('test', frame)
 
     frame = cv2.resize(frame, (900, 900))
 
@@ -79,13 +79,11 @@ def detection_and_classification_webcam(frame):
             label = "shoes"
         print("Vêtement détécter : ", label)
 
-        
-
         cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
         
         cv2.putText(frame, label, (x1, y1 - 10),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
 
-    cv2.imshow("Fusion modèles - Webcam", frame)
+    cv2.imshow("Fusion modeles - Webcam", frame)
 
 

@@ -16,11 +16,3 @@ def visualiser_dataset(image_data):
     frame_box = cv2.resize(frame_box, (900, 900))
     
     return frame_box
-   
-
-image = cv2.imread("scripts/utils/images/fille_short.jpg")
-result = visualiser_dataset(image)
-
-cv2.imshow("Resultat du model best.pt", result)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
