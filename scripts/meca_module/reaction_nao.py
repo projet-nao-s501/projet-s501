@@ -159,26 +159,21 @@ def sad(session):
 
     motion = session.service("ALMotion")
     posture = session.service("ALRobotPosture")
+    tts = session.service("ALTextToSpeech")
 
+    # Réveil
     motion.wakeUp()
-    posture.goToPosture("StandInit", 0.5)
 
-    names = [
-        "RHipYawPitch", "LHipYawPitch",
-        "LShoulderPitch", "RShoulderPitch",
-        "LShoulderRoll", "RShoulderRoll",
-        "HeadPitch"
-    ]
+    # NAO s'assoit
+    posture.goToPosture("Sit", 0.5)
+    time.sleep(1)
 
-    angles = [
-        -0.2, -0.2,     # Torse légèrement penché vers l'avant
-        1.4, 1.4,       # Bras tombants
-        0.15, -0.15,    # Épaules relâchées
-        0.4             # Tête baissée
-    ]
+    # Tête penchée vers l'avant (tristesse)
+    motion.setAngles("HeadPitch", 0.5, 0.2)
+    time.sleep(0.5)
 
-    motion.setAngles(names, angles, 0.2)
-    time.sleep(2)
+    # Parole
+    tts.say("Ouin ouin, j'ai pas trouvé.")
 
 
 
