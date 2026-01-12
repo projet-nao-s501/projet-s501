@@ -33,3 +33,28 @@ def naoDanse(session):
         time.sleep(0.5)
 
     posture.goToPosture("StandInit", 0.5)
+
+def naoDab(session):
+
+    motion = session.service("ALMotion")
+    posture = session.service("ALRobotPosture")
+
+    motion.wakeUp()
+    posture.goToPosture("StandInit", 0.5)
+    
+    names = [
+        "RShoulderPitch", "RShoulderRoll", "RElbowRoll",
+        "LShoulderPitch", "LShoulderRoll", "LElbowRoll",
+        "HeadYaw", "HeadPitch"
+    ]
+
+    angles = [
+        -0.5, -0.3, 1.5,    # Bras droit
+        1.2, 0.5, -1.0,     # Bras gauche
+        -0.5, 0.3           # Tête
+    ]
+
+    motion.setAngles(names, angles, 0.4)
+    time.sleep(1)
+    posture.goToPosture("StandInit", 0.5)
+
