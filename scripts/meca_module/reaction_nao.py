@@ -152,57 +152,26 @@ def naoDab(session):
 
     posture.goToPosture("StandInit", 0.5)
 
-# Torso Motion
-    effectorList = ["Torso", "LArm", "RArm"]
 
-    dy = 0.06
-    dz = 0.06
+def sad(session):
 
-    # pathTorso
-    currentTf = motion.getTransform("Torso", frame, useSensorValues)
-    # 1
-    target1Tf  = almath.Transform(currentTf)
-    target1Tf.r2_c4 += dy
-    target1Tf.r3_c4 -= dz
+    motion = session.service("ALMotion")
 
-    # 2
-    target2Tf  = almath.Transform(currentTf)
-    target2Tf.r2_c4 -= dy
-    target2Tf.r3_c4 -= dz
+    names = [
+        "HipPitch",
+        "LShoulderPitch", "RShoulderPitch",
+        "LShoulderRoll", "RShoulderRoll",
+        "HeadPitch"
+    ]
 
-    pathTorso = []
-    for i in range(3):
-        pathTorso.append(list(target1Tf.toVector()))
-        pathTorso.append(currentTf)
-        pathTorso.append(list(target2Tf.toVector()))
-        pathTorso.append(currentTf)
+    angles = [
+        0.2,      # Torse vers l'avant
+        1.5, 1.5, # Bras vers le bas
+        0.1, -0.1,
+        0.4       # Tête baissée
+    ]
 
-    pathLArm = [motion.getTransform("LArm", frame, useSensorValues)]
-    pathRArm = [motion.getTransform("RArm", frame, useSensorValues)]
+    motion.setAngles(names, angles, 0.2)
+    time.sleep(2)
 
-    pathList = [pathTorso, pathLArm, pathRArm]
-
-    axisMaskList = [almath.AXIS_MASK_ALL, # for "Torso"
-                    almath.AXIS_MASK_VEL, # for "LArm"
-                    almath.AXIS_MASK_VEL] # for "RArm"
-
-    coef       = 0.5
-    timesList  = [
-                  [coef*(i+1) for i in range(12)], # for "Torso" in seconds
-                  [coef*12],                       # for "LArm" in seconds
-                  [coef*12]                        # for "RArm" in seconds
-                 ]
-
-    motion.transformInterpolations(
-        effectorList, frame, pathList, axisMaskList, timesList)
-    
-    # Deactivate whole body
-    isEnabled    = False
-    motion.wbEnable(isEnabled)
-
-    # Send robot to Pose Init
-    posture.goToPosture("StandInit", 0.3)
-
-    # Go to rest position
-    motion.rest()
 
