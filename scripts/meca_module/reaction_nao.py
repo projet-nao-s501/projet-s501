@@ -172,13 +172,13 @@ def sad(session):
 
     # Penche un peu plus en avant
     names = [
-        "LHeadPitch", "RHeadPitch",
+        "HeadPitch",
         "LKneePitch", "RKneePitch", 
         "LAnklePitch", "RAnklePitch"
     ]
 
     angles = [
-        0.65, 0.65,   # Tête plus baissée
+        0.65,         # Tête plus baissée
         0.2, 0.2,     # Légère flexion des genoux
         -0.05, -0.05  # Légère compensation chevilles
     ]
@@ -188,6 +188,28 @@ def sad(session):
 
     # Parole
     tts.say("Ouin ouin, j'ai pas trouvé.")
+
+
+def checker(session):
+
+    motion = session.service("ALMotion")
+    posture = session.service("ALRobotPosture")
+    tts = session.service("ALTextToSpeech")
+
+    names = ["RShoulderPitch", "RShoulderRoll", "RElbowYaw", "RElbowRoll"]
+    angles = [-0.5, -0.2, 1.5, 0.5]
+
+    motion.setAngles(names, angles, 0.4)
+    time.sleep(1)
+
+    motion.openHand("RHand")
+    time.sleep(0.5)
+    motion.closeHand("RHand")
+
+    # Parole
+    tts.say("Salut ça va, chèque mois ça !")
+
+    posture.goToPosture("StandInit", 0.5)
 
 
 
