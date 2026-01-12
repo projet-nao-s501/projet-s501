@@ -14,6 +14,35 @@
   - [Organisation du git](#organisation-du-git)
 
 
+## Description du Projet NAO : Où est Charlie ?
+
+### Contexte du projet
+Dans le cadre de notre 3ᵉ année de BUT Informatique, nous avons réalisé le projet NAO.  
+Après la constitution de nos équipes, l’objectif était de concevoir un projet pertinent permettant d’exploiter au mieux les capacités du robot NAO.
+
+### Description du projet
+Après mûre réflexion, nous avons choisi de nous inspirer du concept du jeu « Où est Charlie ? ».  
+Le principe est simple : à partir d’une description vestimentaire (couleur et type de vêtements), le robot NAO tente d’identifier une personne correspondant aux caractéristiques fournies.
+
+En fonction du résultat obtenu, le robot interagit avec la personne ciblée ou indique qu’aucune correspondance n’a été trouvée. On a pu par exemple le faire daber ou même danser.
+
+### Objectifs pédagogiques
+Ce projet ludique nous a permis de :
+- développer nos compétences en entraînement d'IA
+- approfondir notre compréhension de la robotique
+- prendre en main le framework **NAOqi**
+- renforcer nos bases en **Python (version 3.11.2)**
+- découvrir et appliquer la méthode **SLAM** (Simultaneous Localization and Mapping) pour la localisation et la cartographie de l’environnement du robot
+- manipulation de différents modèles IA trouvés en ligne
+- traiter les images pour la détéction de couleurs présentent dans l'environnement
+- traiter les données vocales et intéractions avec le robot
+
+### Organisation et outils
+Le projet a été réalisé par une équipe de **9 personnes**.  
+Nous avons travaillé principalement avec :
+- **Jira** pour la gestion de projet
+- **GitHub** pour le versionnage du code, connecté à Jira pour le suivi des tâches
+
 
 ## Installation
 
