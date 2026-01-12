@@ -3,7 +3,7 @@ import os
 import time
 import numpy as np
 from ultralytics import YOLO
-from detection_couleurs import detection_couleurs
+from scripts.ia_module.detection_couleurs import detection_couleurs
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_FILENAME = os.path.join(SCRIPT_DIR, "deepfashion2_yolov8s-seg.pt")
@@ -22,7 +22,7 @@ def extraire_segment(frame, mask, box):
     
     return crop_detoure
 
-def detection_formes():    
+def detection_formes(frame):
     dernier_temps_print = 0 
 
     results = model.predict(source=frame, conf=0.4, verbose=False)
@@ -35,8 +35,7 @@ def detection_formes():
         if r.masks is not None:
             for i, (mask, box) in enumerate(zip(r.masks, r.boxes)):
                 label = model.names[int(box.cls[0])]
-                obj_id = f"{label}_{i}"
-                
+
                 vêtement_seul = extraire_segment(frame, mask, box)
 
                 if vêtement_seul.size > 0:
