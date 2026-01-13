@@ -38,24 +38,24 @@ PHRASES_DECLENCHEMENT = [
 VETEMENTS_HAUT = [
     "pull",
     "tshirt",
-    "veste manche courte",
-    "veste manche longue",
+    "veste-manche-courte",
+    "veste-manche-longue",
     "gilet",
     "sacoche",
-    "robe manche courte",
-    "robe manche longue",
-    "robe tailleur",
-    "robe bretelle",
+    "robe-manche-courte",
+    "robe-manche-longue",
+    "robe-tailleur",
+    "robe-bretelle",
 ]
 
 VETEMENTS_BAS = [
     "short",
     "pantalon",
     "jupe",
-    "robe manche courte",
-    "robe manche longue",
-    "robe tailleur",
-    "robe bretelle",
+    "robe-manche-courte",
+    "robe-manche-longue",
+    "robe-tailleur",
+    "robe-bretelle",
 ]
 
 # Vocabulaire : Couleurs

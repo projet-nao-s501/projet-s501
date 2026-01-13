@@ -11,17 +11,17 @@ sessionNao = None
 vetements = {
 	"pull": "long_sleeved_shirt",
 	"tshirt": "short_sleeved_shirt",
-	"veste manche courte": "short_sleeved_outwear",
-	"veste manche longue": "long_sleeved_outwear",
+	"veste-manche-courte": "short_sleeved_outwear",
+	"veste-manche-longue": "long_sleeved_outwear",
 	"gilet": "vest",
 	"sacoche": "sling",
 	"short": "shorts",
 	"pantalon": "trousers",
 	"jupe": "skirt",
-	"robe manche courte": "short_sleeved_dress",
-	"robe manche longue": "long_sleeved_dress",
-	"robe tailleur": "vest_dress",
-	"robe bretelle": "sling_dress"
+	"robe-manche-courte": "short_sleeved_dress",
+	"robe-manche-30longue": "long_sleeved_dress",
+	"robe-tailleur": "vest_dress",
+	"robe-bretelle": "sling_dress"
 }
 
 
@@ -44,6 +44,7 @@ def extraire_segment(frame, mask, box):
 
 def detection_formes(frame,tab,session):
   
+    tts = session.service("ALTextToSpeech")
     results = model.predict(source=frame, conf=0.4, verbose=False)
 
     infos_a_afficher = {}
@@ -98,4 +99,6 @@ def detection_formes(frame,tab,session):
         naoDanse(session)
         return 0
     
+    
+    tts.say("Ce n'est pas toi !")
     return 1

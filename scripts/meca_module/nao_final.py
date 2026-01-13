@@ -227,7 +227,7 @@ def autonomous_exploration(session, img, video_service, name_id,tab):
         cx, cz = int(round(x/0.5)), int(round(z/0.5))
         if (cx, cz) not in visited_zones:
             visited_zones.add((cx, cz))
-            if len(visited_zones) >= 30:
+            if len(visited_zones) >= 3:
                 motion.stopMove()
                 tts.say("Exploration terminée.")
                 sad(session)
