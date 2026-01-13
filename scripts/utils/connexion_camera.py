@@ -1,7 +1,5 @@
 import cv2
 import numpy as np
-from scripts.ia_module.traitement_image import detectionRouge
-#from scripts.traitement_vetement_fonction import visualiser_dataset
 from scripts.ia_module.detection_couleurs import detection_couleurs_Camera
 
 def connexionCamera(session):
@@ -43,16 +41,9 @@ def connexionCamera(session):
         img2 = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
 
         # fonction sur IA 
-       # result_yolo = visualiser_dataset(img2)
-
-
         result = detection_couleurs_Camera(img2)
         cv2.namedWindow("Detection couleurs", cv2.WINDOW_NORMAL)
         cv2.imshow("Detection couleurs", result)
-
-        #cv2.imshow("Detection YOLO", result_yolo)
-        
-        #img = cv2.resize(img, (1000, 800), interpolation=cv2.INTER_AREA)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
