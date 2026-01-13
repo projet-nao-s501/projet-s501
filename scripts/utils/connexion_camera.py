@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-from scripts.ia_module.detection_formes import detection_formes
+from nao_final import autonomous_exploration, initialiser_exploration
 
 def connexionCamera(session):
     video_service = session.service("ALVideoDevice")
@@ -28,6 +28,8 @@ def connexionCamera(session):
     name_id = video_service.subscribeCamera(name_id, camera_index, resolution, color_space, fps)
     print("Subscribed to camera:", name_id)
 
+    initialiser_exploration(session)
+
     while True:
         image = video_service.getImageRemote(name_id)
         if image is None:
@@ -39,7 +41,7 @@ def connexionCamera(session):
 
         img = np.frombuffer(array, dtype=np.uint8).reshape((height, width, 3))
 
-        detection_formes(img)
+        autonomous_exploration(session, img, video_service, name_id)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break

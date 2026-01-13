@@ -42,12 +42,5 @@ def detection_formes(frame):
                     couleur = detection_couleurs(vêtement_seul)
                     infos_a_afficher.append(f"{label}: {couleur}")
 
-    temps_actuel = time.time()
-
-    if temps_actuel - dernier_temps_print >= 1.0:
-        if infos_a_afficher:
-            print(f" | ".join(infos_a_afficher))
-        
-        dernier_temps_print = temps_actuel
-
+    print(f" | ".join(infos_a_afficher))
     cv2.imshow("IA Segmentation Fashion", annotated_frame)
