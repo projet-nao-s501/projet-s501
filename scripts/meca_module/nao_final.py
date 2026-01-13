@@ -11,6 +11,7 @@ import cv2
 import subprocess 
 from ultralytics import YOLO
 from scripts.ia_module.detection_formes import detection_formes
+from scripts.meca_module.reaction_nao import sad
 import qi
 
 # --- VARIABLES GLOBALES ---
@@ -112,7 +113,7 @@ def detect_person(img, model):
                 
     return person_detected, img
 
-def wait_and_update_display(video_service, name_id, step_name, duration=7.0):
+def wait_and_update_display(video_service, name_id, step_name, tab,session,duration=7.0):
     start = time.time()
     while time.time() - start < duration:
         img_raw = video_service.getImageRemote(name_id)
@@ -128,12 +129,12 @@ def wait_and_update_display(video_service, name_id, step_name, duration=7.0):
             cv2.imshow("Exploration Robot", frame)
             
             # Appel de ta fonction d'analyse de formes sur le buffer frais
-            detection_formes(arr) 
-            
+            detection_formes(arr,tab,session)
+
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
-def perform_vertical_scan(session, video_service, name_id):
+def perform_vertical_scan(session, video_service, name_id, tab):
     motion = session.service("ALMotion")
     memory = session.service("ALMemory")
     tts = session.service("ALTextToSpeech")
@@ -156,7 +157,7 @@ def perform_vertical_scan(session, video_service, name_id):
 
     motion.setAngles("HeadPitch", -0.6, 0.1)
     motion.setAngles(["LShoulderPitch", "RShoulderPitch"], [-0.5, -0.5], 0.1)
-    wait_and_update_display(video_service, name_id, "BAS", 7.0)
+    wait_and_update_display(video_service, name_id, "BAS",tab, session, 7.0)
 
     # ZONE À RISQUE
     # On réduit légèrement la vitesse (0.03 au lieu de 0.05) pour plus de douceur
@@ -164,7 +165,7 @@ def perform_vertical_scan(session, video_service, name_id):
     motion.setAngles(["LShoulderPitch", "RShoulderPitch"], [-0.4, -0.4], 0.03)
     motion.setAngles(["LElbowRoll", "RElbowRoll"], [0, 0], 0.03)
     motion.setAngles(["LHipPitch", "RHipPitch"], [-0.3, -0.3], 0.03) 
-    wait_and_update_display(video_service, name_id, "HAUT", 7.0)
+    wait_and_update_display(video_service, name_id, "HAUT",tab, session, 7.0)
     
     # reset posture avant rotation
     print("Retour posture stable...")
@@ -179,7 +180,7 @@ def perform_vertical_scan(session, video_service, name_id):
     print("Rotation...")
     motion.moveTo(0, 0, 1.0)
 
-def autonomous_exploration(session, img, video_service, name_id):
+def autonomous_exploration(session, img, video_service, name_id,tab):
     global yolo_model, visited_zones
     
     motion = session.service("ALMotion")
@@ -209,7 +210,7 @@ def autonomous_exploration(session, img, video_service, name_id):
         motion.stopMove()
         
         # On lance le scan ET la rotation (qui sont bloquants dans perform_vertical_scan)
-        perform_vertical_scan(session, video_service, name_id)
+        perform_vertical_scan(session, video_service, name_id, tab)
         
         # IMPORTANT : On sort de la fonction ici pour que la boucle connexionCamera 
         # reprenne proprement sans exécuter le motion.move() du bas.
@@ -224,6 +225,7 @@ def autonomous_exploration(session, img, video_service, name_id):
             if len(visited_zones) >= 30:
                 motion.stopMove()
                 tts.say("Exploration terminée.")
+                sad(session)
                 return
 
     # 5. MARCHE PAR DÉFAUT (si rien n'est détecté)

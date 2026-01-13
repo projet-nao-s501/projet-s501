@@ -11,6 +11,8 @@ import time
 import qi
 import argparse
 
+from scripts.utils.connexion_camera import connexionCamera
+
 # ============================================
 # CONFIGURATION
 # ============================================
@@ -34,15 +36,26 @@ PHRASES_DECLENCHEMENT = [
 
 # Vocabulaire : Types de vêtements
 VETEMENTS_HAUT = [
-    "chemise",
     "pull",
-    "veste",
-    "polo",
+    "tshirt",
+    "veste manche courte",
+    "veste manche longue",
+    "gilet",
+    "sacoche",
+    "robe manche courte",
+    "robe manche longue",
+    "robe tailleur",
+    "robe bretelle",
 ]
 
 VETEMENTS_BAS = [
+    "short",
     "pantalon",
-    "jupe"
+    "jupe",
+    "robe manche courte",
+    "robe manche longue",
+    "robe tailleur",
+    "robe bretelle",
 ]
 
 # Vocabulaire : Couleurs
@@ -537,7 +550,7 @@ def phase5_stockage_et_lancement(memory, tts, description_haut, description_bas)
 # FONCTION PRINCIPALE APPELABLE
 # ============================================
 
-def executer_collecte_vocale(session):
+def executer_collecte_vocale(session, arr):
     """
     Fonction principale pour exécuter toute la collecte vocale
     Peut être appelée depuis le main.py centralisé
@@ -612,6 +625,11 @@ def executer_collecte_vocale(session):
             tts.say("Erreur de stockage.")
             return 1
         
+        #comparaison 
+
+        tab = [description_haut, description_bas]
+
+        connexionCamera(session, tab)      
         # Cleanup final
         cleanup_services(asr, memory)
         

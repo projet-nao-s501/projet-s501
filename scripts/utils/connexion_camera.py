@@ -4,7 +4,7 @@ from scripts.meca_module.nao_final import autonomous_exploration, initialiser_ex
 from scripts.ia_module.traitement_image import detectionRouge, detecter_couleur
 from scripts.ia_module.vocal.voice_recognition_2 import voice_recognition_2
 
-def connexionCamera(session):
+def connexionCamera(session, description_haut_ai, description_bas_ai):
     video_service = session.service("ALVideoDevice")
     
     # Stocker la couleur détectée
