@@ -36,33 +36,6 @@ def detectionRouge(frame) :
 # présente (n'affiche pas juste un filtre
 # visuel)
 
-def analyser_masque(mask, seuil_pourcentage=1.5):
-    """
-    Analyse un masque pour déterminer si
-    assez de pixels sont détectés.
-    La fonction compte le nbre de pixels
-    non-noirs dans le masque. Si ce nbre
-    dépasse le seuil en %, on considère
-    que la couleur est prèsente et la
-    fonction retourne True.
-    """
-
-    # On compte les pixels non-noirs 
-    # (pixels de la couleur détectée)
-    pixels_detectes = cv2.countNonZero(mask)
-
-    # Calcul du total de pixels de l'image
-    hauteur, largeur = mask.shape[:2]
-    total_pixels = hauteur * largeur
-
-    # Calcul du pourcentage
-    pourcentage = (pixels_detectes / total_pixels) * 100
-
-    # A décommenter pour le debug
-    # print(f"[DEBUG] Pixels détectés: {pixels_detectes}/{total_pixels} ({pourcentage:.2f}%)")
-    
-    return pourcentage >= seuil_pourcentage
-
 def detecter_couleur(frame, seuil_pourcentage=1.5):
     """
     Détecte quelle couleur (rouge, noir, ...)
