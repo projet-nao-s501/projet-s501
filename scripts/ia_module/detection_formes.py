@@ -9,7 +9,7 @@ from scripts.meca_module.reaction_nao import naoDab, naoDanse
 sessionNao = None
 
 vetements = {
-	"pull": "long sleeve shirt",
+	"pull": "long_sleeved_shirt",
 	"tshirt": "short_sleeved_shirt",
 	"veste manche courte": "short_sleeved_outwear",
 	"veste manche longue": "long_sleeved_outwear",
@@ -60,18 +60,23 @@ def detection_formes(frame,tab,session):
                 if vêtement_seul.size > 0:
                     couleur = detection_couleurs(vêtement_seul)
                     infos_a_afficher[label] = couleur
+    
+    print(infos_a_afficher)
+    cv2.imshow("IA Segmentation Fashion", annotated_frame)
 
-     # description du robot 
+    # description du robot 
     desc_robo_haut = tab[0] 
     desc_robo_bas = tab[1]
 
-   # description du modèle ( ce que voit l'ia)
-    changer =  desc_robo_haut.split(":")
+    # description du modèle ( ce que voit l'ia)
+    changer =  desc_robo_haut.split(" ")
+    print("changer : ", changer)
 
     desc_haut_ia = changer[0]
     desc_couleur_haut_ia = changer[1]
 
-    changer2 =   desc_robo_bas.split(":")
+    changer2 =   desc_robo_bas.split(" ")
+    print("changer2 : ", changer2)
 
     desc_bas_ia = changer2[0]
     desc_couleur_bas_ia = changer2[1]
@@ -81,14 +86,14 @@ def detection_formes(frame,tab,session):
     label_haut = vetements[desc_haut_ia]
     label_bas = vetements[desc_bas_ia]
 
+    print("haut : ", label_haut, " bas : ", label_bas)
+
 
     #infos = ["long_sleeved_shirt":"rouge", "trousers":"black"]
     if (
     infos_a_afficher.get(label_haut) == desc_couleur_haut_ia
     and infos_a_afficher.get(label_bas) == desc_couleur_bas_ia):
-        
+        tts.say("J'ai trouvé !")
         naoDab(session)
         naoDanse(session)
-
-    print(f" | ".join(infos_a_afficher))
-    cv2.imshow("IA Segmentation Fashion", annotated_frame)
+        return

@@ -54,34 +54,6 @@ def connexionCamera(session,tab):
         img = np.frombuffer(array, dtype=np.uint8).reshape((height, width, 3))
 
         autonomous_exploration(session, img, video_service, name_id, tab)
-        
-        img2 = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
-
-        # Appel de la fonction detecter_couleur
-        # pour analyser l'image
-        couleur_detectee = detecter_couleur(img2, seuil_pourcentage=10)
-
-        if couleur_detectee:
-            # Stocker la couleur dans ALMemory 
-            # pour le module vocal
-            memory.insertData("CouleurDetectee", couleur_detectee)
-            print(f"[INFO] Couleur détectée et stockée : {couleur_detectee}")
-            
-            # Annoncer à CHAQUE détection
-            tts.say("Je détecte une couleur")
-            print(f"[VOCAL] NAO annonce : 'J'ai detecté une couleur'")
-
-            voice_recognition_2(session, couleur_detectee)
-        else:
-            # Aucune couleur détectée : réinitialiser
-            memory.insertData("CouleurDetectee", None)
-            derniere_couleur_annoncee = None
-        
-        # Affichage visuel (comme avant)
-        result = detectionRouge(img2)
-        cv2.imshow("Detection du rouge", result)
-        
-        img = cv2.resize(img, (224, 224), interpolation=cv2.INTER_AREA)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break

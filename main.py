@@ -11,7 +11,6 @@ from scripts.ia_module.vocal.collecte_description import executer_collecte_vocal
 def main(session, args) :
 
     executer_collecte_vocale(session)
-    connexionCamera(session)
     return 0
 
 if __name__ == "__main__":

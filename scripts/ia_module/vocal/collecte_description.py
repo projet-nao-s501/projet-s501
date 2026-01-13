@@ -550,7 +550,7 @@ def phase5_stockage_et_lancement(memory, tts, description_haut, description_bas)
 # FONCTION PRINCIPALE APPELABLE
 # ============================================
 
-def executer_collecte_vocale(session, arr):
+def executer_collecte_vocale(session):
     """
     Fonction principale pour exécuter toute la collecte vocale
     Peut être appelée depuis le main.py centralisé
