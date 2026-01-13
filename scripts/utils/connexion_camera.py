@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-from nao_final import autonomous_exploration, initialiser_exploration
+from scripts.meca_module.nao_final import autonomous_exploration, initialiser_exploration
 
 def connexionCamera(session):
     video_service = session.service("ALVideoDevice")

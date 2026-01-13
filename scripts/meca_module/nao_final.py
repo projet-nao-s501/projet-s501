@@ -11,19 +11,14 @@ import cv2
 import subprocess 
 from ultralytics import YOLO
 from scripts.ia_module.detection_formes import detection_formes
-
-# Import de qi (NAOqi)
-try:
-    import qi
-except ImportError:
-    print("CRITIQUE: Module 'qi' introuvable. Avez-vous activé 'source nao_env/bin/activate' ?")
-    sys.exit(1)
+import qi
 
 # --- VARIABLES GLOBALES ---
 calib_data = {"y_bias": 0.0, "rot_mult": 1.0}
 slam_process = None 
 MODEL_PATH = "best.pt"
 
+# Met le robot NAO en position debout et active les moteurs.
 def stand_up(session):
     motion = session.service("ALMotion")
     posture = session.service("ALRobotPosture")
@@ -31,6 +26,9 @@ def stand_up(session):
     posture.goToPosture("StandInit", 0.5)
     print("✓ Robot Debout")
 
+
+# Met le robot en position assise et désactive les moteurs
+# pour une mise en sécurité.
 def sit_down(session):
     motion = session.service("ALMotion")
     posture = session.service("ALRobotPosture")
@@ -38,10 +36,11 @@ def sit_down(session):
     motion.rest()
     print("✓ Robot Assis (Moteurs coupés)")
 
-# --- FONCTIONS SLAM ---
-
+# Lance le moteur ORB-SLAM3 en arrière-plan via un sous-processus.
+# Configure l'environnement nécessaire
+# et retourne le processus lancé.
 def start_slam_background():
-    print("🚀 Démarrage du moteur SLAM (ORB-SLAM3)...")
+    print("Démarrage du moteur SLAM (ORB-SLAM3)")
     env = os.environ.copy()
     cwd = os.getcwd()
     env["LD_LIBRARY_PATH"] = os.path.join(cwd, "libs") + ":" + env.get("LD_LIBRARY_PATH", "")
@@ -51,9 +50,11 @@ def start_slam_background():
         print(f"✓ SLAM actif (PID: {proc.pid})")
         return proc
     except Exception as e:
-        print(f"❌ Erreur lancement SLAM: {e}")
+        print(f"Erreur lancement SLAM: {e}")
         return None
 
+# Lit la dernière position estimée par le SLAM depuis le fichier
+# CameraTrajectory.txt et retourne les coordonnées (x, z).
 def get_slam_position():
     try:
         if os.path.exists("CameraTrajectory.txt"):
@@ -66,43 +67,44 @@ def get_slam_position():
     except: pass
     return 0.0, 0.0
 
-# --- FONCTION PRINCIPALE D'EXPLORATION ---
-
+# Modèle YOLO chargé une seule fois
 yolo_model = None 
+# Ensemble des zones déjà visitées (SLAM)
 visited_zones = set()
 
+# Initialise le robot avant l'exploration :
+# - mise en posture debout
+# - orientation de la tête
+# - mouvements latéraux pour initialiser correctement le SLAM
 def initialiser_exploration(session):
-    """Effectue la séquence de démarrage indispensable pour le SLAM et la posture."""
     motion = session.service("ALMotion")
     tts = session.service("ALTextToSpeech")
     
-    print("--- 🏁 INITIALISATION ---")
-    stand_up(session) # Ta fonction existante
+    print("INITIALISATION")
+    stand_up(session)
     
-    # Position de base et rigidité
+    # Rigide
     motion.setStiffnesses("Head", 1.0)
     motion.setAngles("HeadPitch", -0.1, 0.1)
 
-    # Séquence de regard G/D pour le SLAM (Crucial pour la cartographie)
+    # Séquence de regard
     tts.say("Initialisation du slam.")
     motion.setAngles("HeadYaw", 0.4, 0.08)
     time.sleep(3.0)
     motion.setAngles("HeadYaw", -0.4, 0.08)
     time.sleep(3.0)
     motion.setAngles("HeadYaw", 0.0, 0.08)
-    print("✅ SLAM Initialisé. Prêt pour l'exploration.")
+    print("SLAM Initialisé. Prêt pour l'exploration.")
 
 def detect_person(img, model):
-    """Analyse l'image et vérifie si un humain est à proximité (>15% de largeur)."""
+
     results = model(img, verbose=False, conf=0.5)
     person_detected = False
     
     for r in results:
         for box in r.boxes:
-            # .item() convertit le Tensor en nombre standard pour éviter l'erreur de comparaison
             box_width = (box.xyxy[0][2] - box.xyxy[0][0]).item()
             
-            # Seuil de proximité basé sur la largeur de l'image
             if box_width > (img.shape[1] * 0.15):
                 person_detected = True
                 x1, y1, x2, y2 = map(int, box.xyxy[0])
@@ -111,7 +113,6 @@ def detect_person(img, model):
     return person_detected, img
 
 def wait_and_update_display(video_service, name_id, step_name, duration=7.0):
-    """Maintient le flux vidéo "Live" et l'affichage pendant les pauses de mouvement."""
     start = time.time()
     while time.time() - start < duration:
         img_raw = video_service.getImageRemote(name_id)
@@ -136,31 +137,28 @@ def perform_vertical_scan(session, video_service, name_id):
     motion = session.service("ALMotion")
     memory = session.service("ALMemory")
     tts = session.service("ALTextToSpeech")
-    
-    # --- 1. ARRÊT ET STABILISATION ---
+
     motion.stopMove()
     time.sleep(0.5) # Crucial : on attend que le robot ne balance plus
     
-    # --- 2. VÉRIFICATION INERTIELLE (Sécurité chute) ---
     try:
         ax = memory.getData("Device/SubDeviceList/InertialSensor/AngleX/Sensor/Value")
         ay = memory.getData("Device/SubDeviceList/InertialSensor/AngleY/Sensor/Value")
         if abs(ax) > 0.25 or abs(ay) > 0.25: # Plus strict que l'original
-            print("⚠️ Robot instable, scan annulé pour éviter la chute.")
+            print("Robot instable, scan annulé pour éviter la chute.")
             return
     except: pass
 
-    print("\n--- 🕵️ DÉBUT SCAN SÉCURISÉ ---")
+    print("\nDÉBUT SCAN SÉCURISÉ")
     tts.say("Personne détectée.")
     tts.say("Peux-tu reculer de trois pas s'il-te-plait")
     time.sleep(5.0)
 
-    # ÉTAPE 1 : Bas (Tête + Épaules) - Peu de risque ici
     motion.setAngles("HeadPitch", -0.6, 0.1)
     motion.setAngles(["LShoulderPitch", "RShoulderPitch"], [-0.5, -0.5], 0.1)
     wait_and_update_display(video_service, name_id, "BAS", 7.0)
 
-    # ÉTAPE 2 : Haut (Hanches + Coudes) - ZONE À RISQUE
+    # ZONE À RISQUE
     # On réduit légèrement la vitesse (0.03 au lieu de 0.05) pour plus de douceur
     motion.setAngles("HeadPitch", -0.6720, 0.1)
     motion.setAngles(["LShoulderPitch", "RShoulderPitch"], [-0.4, -0.4], 0.03)
@@ -168,8 +166,8 @@ def perform_vertical_scan(session, video_service, name_id):
     motion.setAngles(["LHipPitch", "RHipPitch"], [-0.3, -0.3], 0.03) 
     wait_and_update_display(video_service, name_id, "HAUT", 7.0)
     
-    # --- 3. RESET POSTURE AVANT ROTATION ---
-    print("🔄 Retour posture stable...")
+    # reset posture avant rotation
+    print("Retour posture stable...")
     # On remet les hanches à 0 d'abord !
     motion.setAngles(["LHipPitch", "RHipPitch"], [0.0, 0.0], 0.03)
     motion.setAngles("HeadPitch", -0.1, 0.1)
@@ -178,12 +176,10 @@ def perform_vertical_scan(session, video_service, name_id):
     # On attend que le reset soit fini avant de tourner
     time.sleep(1.0) 
     
-    # --- 4. ROTATION ---
-    print("🔄 Rotation...")
+    print("Rotation...")
     motion.moveTo(0, 0, 1.0)
 
 def autonomous_exploration(session, img, video_service, name_id):
-    """Cerveau principal appelé pour chaque image reçue."""
     global yolo_model, visited_zones
     
     motion = session.service("ALMotion")
