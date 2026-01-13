@@ -1,7 +1,4 @@
-import qi
 import time
-import numpy as np
-from spatialmath import SE3
 
 def offset_tf(original_tf, x_off=0.0, y_off=0.0, z_off=0.0):
     new_tf = list(original_tf)
@@ -92,12 +89,6 @@ def naoDab(session):
     motion.setAngles(names, angles, 0.4)
 
     posture.goToPosture("StandInit", 0.5)
-
-
-import time
-
-import qi
-import time
 
 def sad(session):
 
