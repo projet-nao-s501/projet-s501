@@ -4,7 +4,7 @@ from scripts.meca_module.nao_final import autonomous_exploration, initialiser_ex
 from scripts.ia_module.traitement_image import detectionRouge, detecter_couleur
 from scripts.ia_module.vocal.voice_recognition_2 import voice_recognition_2
 
-def connexionCamera(session, description_haut_ai, description_bas_ai):
+def connexionCamera(session,tab):
     video_service = session.service("ALVideoDevice")
     
     # Stocker la couleur détectée
@@ -53,7 +53,7 @@ def connexionCamera(session, description_haut_ai, description_bas_ai):
 
         img = np.frombuffer(array, dtype=np.uint8).reshape((height, width, 3))
 
-        autonomous_exploration(session, img, video_service, name_id)
+        autonomous_exploration(session, img, video_service, name_id, tab)
         
         img2 = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
 
