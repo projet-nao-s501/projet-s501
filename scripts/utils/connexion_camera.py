@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 from scripts.meca_module.nao_final import autonomous_exploration, initialiser_exploration
+from scripts.ia_module.detection_couleurs import detection_couleurs_Camera
 
 def connexionCamera(session):
     video_service = session.service("ALVideoDevice")
