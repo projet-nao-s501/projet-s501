@@ -16,7 +16,7 @@ import qi
 # --- VARIABLES GLOBALES ---
 calib_data = {"y_bias": 0.0, "rot_mult": 1.0}
 slam_process = None 
-MODEL_PATH = "best.pt"
+MODEL_PATH = "scripts/meca_module/best.pt"
 
 # Met le robot NAO en position debout et active les moteurs.
 def stand_up(session):
