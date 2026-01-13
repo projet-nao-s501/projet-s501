@@ -4,16 +4,16 @@ import qi
 import argparse
 import sys
 from scripts.utils.connexion_camera import connexionCamera
-
 from scripts.ia_module.vocal.collecte_description import executer_collecte_vocale
 
 
 def main(session, args) :
-    #connexionCamera(session)
 
     executer_collecte_vocale(session)
+    connexionCamera(session)
+    
     return 0
-
+ 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Contrôle du robot NAO.")
     parser.add_argument("--ip", type=str, default="172.16.1.163",
