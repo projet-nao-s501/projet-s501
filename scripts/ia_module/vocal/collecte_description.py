@@ -501,10 +501,7 @@ def phase4_confirmation(asr, tts, memory, description_haut, description_bas):
         print("[ROBOT] Je vais considérer que c'est correct.")
         return True
 
-
-# ============================================
 # PHASE 5 : STOCKAGE ET LANCEMENT
-# ============================================
 
 def phase5_stockage_et_lancement(memory, tts, description_haut, description_bas):
     """
@@ -536,104 +533,100 @@ def phase5_stockage_et_lancement(memory, tts, description_haut, description_bas)
         print("[ERREUR PHASE 5] {}".format(e))
         return False
 
-
 # ============================================
-# FONCTION PRINCIPALE
+# FONCTION PRINCIPALE APPELABLE
 # ============================================
 
-def main():
+def executer_collecte_vocale(session):
     """
-    Fonction principale du script
+    Fonction principale pour exécuter toute la collecte vocale
+    Peut être appelée depuis le main.py centralisé
+    
+    Args:
+        session: Session qi connectée au robot
+    
+    Returns:
+        int: 0 si succès, 1 si échec
     """
-    parser = argparse.ArgumentParser(
-        description='Script de collecte vocale guidée pour recherche de personne'
-    )
-    parser.add_argument('--ip', type=str, default=DEFAULT_ROBOT_IP)
-    parser.add_argument('--port', type=int, default=DEFAULT_ROBOT_PORT)
-    
-    args = parser.parse_args()
-    
-    print("\n" + "="*60)
-    print("SCRIPT COLLECTE DESCRIPTION - VERSION GUIDEE")
-    print("Robot: {}:{}".format(args.ip, args.port))
-    print("="*60)
+   
+    print("MODULE VOCAL - COLLECTE DESCRIPTION")
     
     try:
-        print("\n[CONNEXION] Connexion au robot...")
-        session = qi.Session()
-        session.connect("tcp://{}:{}".format(args.ip, args.port))
-        print("[CONNEXION] Session établie")
-        
+        # Récupérer les services
         asr = session.service("ALSpeechRecognition")
         tts = session.service("ALTextToSpeech")
         memory = session.service("ALMemory")
-        print("[CONNEXION] Services récupérés")
         
+        # Configuration langue
         asr.setLanguage("French")
-        print("[CONFIG] Langue : Français")
+        print("[VOCAL] Langue : Français")
         
+        # Cleanup initial
         if not cleanup_services(asr, memory):
-            print("[ERREUR] Échec du cleanup initial")
+            print("[VOCAL] Erreur cleanup")
+            tts.say("Erreur d'initialisation.")
             return 1
         
-        # Boucle principale avec possibilité de recommencement
+        # Boucle avec recommencement possible
+        description_haut = None
+        description_bas = None
+        
         while True:
-            # Phase 1
+            # Phase 1 : Déclencheur
             if not initialiser_asr_phase1(asr):
-                print("[ERREUR] Impossible d'initialiser ASR Phase 1")
                 cleanup_services(asr, memory)
+                tts.say("Erreur d'initialisation.")
                 return 1
             
             if not phase1_attente_declencheur(asr, tts, memory):
-                print("[ARRET] Échec Phase 1")
                 cleanup_services(asr, memory)
                 return 1
             
-            # Phase 2
+            # Phase 2 : Haut
             description_haut = phase2_collecte_haut(asr, tts, memory)
             if not description_haut:
-                print("[ARRET] Échec Phase 2")
                 cleanup_services(asr, memory)
+                tts.say("Erreur lors de la collecte.")
                 return 1
             
-            # Phase 3
+            # Phase 3 : Bas
             description_bas = phase3_collecte_bas(asr, tts, memory)
             if not description_bas:
-                print("[ARRET] Échec Phase 3")
                 cleanup_services(asr, memory)
+                tts.say("Erreur lors de la collecte.")
                 return 1
             
-            # Phase 4
+            # Phase 4 : Confirmation
             if phase4_confirmation(asr, tts, memory, description_haut, description_bas):
-                break
+                break  # Confirmation OK
             else:
-                print("[INFO] Recommencement des phases 2 et 3...")
-                continue
+                continue  # Recommencer
         
-        # Phase 5
+        # Phase 5 : Stockage
+        print("\n[VOCAL] Descriptions collectées :")
+        print("  - Haut : {}".format(description_haut))
+        print("  - Bas  : {}".format(description_bas))
+        
         if not phase5_stockage_et_lancement(memory, tts, description_haut, description_bas):
-            print("[ERREUR] Échec Phase 5")
             cleanup_services(asr, memory)
+            tts.say("Erreur de stockage.")
             return 1
         
-        print("\n" + "="*60)
-        print("SUCCES COMPLET")
-        print("Haut : '{}'".format(description_haut))
-        print("Bas  : '{}'".format(description_bas))
-        print("="*60)
-        
+        # Cleanup final
         cleanup_services(asr, memory)
         
-        print("\n[FIN] Script terminé avec succès (code 0)")
+        print("\n[VOCAL] COLLECTE TERMINEE AVEC SUCCES")
+        print("[VOCAL] Données stockées dans ALMemory")
+        print("[VOCAL] Événement 'RechercheDemarre' levé")
+        
         return 0
         
     except Exception as e:
-        print("\n[ERREUR CRITIQUE] {}".format(e))
+        print("[VOCAL] ERREUR : {}".format(e))
         import traceback
         traceback.print_exc()
+        try:
+            tts.say("Une erreur s'est produite.")
+        except:
+            pass
         return 1
-
-
-if __name__ == "__main__":
-    code_sortie = main()
-    sys.exit(code_sortie)

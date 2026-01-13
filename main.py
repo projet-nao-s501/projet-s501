@@ -1,76 +1,34 @@
-#! /usr/bin/env python
 # -*- encoding: UTF-8 -*-
-
-# Lien pour utiliser le flux video et entrainer un modele
-# https://teachablemachine.withgoogle.com/
-
-# Needed packages to use exported model
-# pip install tensorflow==2.12.1 numpy==1.23.5 opencv-python==4.9.0.80
 
 import qi
 import argparse
 import sys
-import threading
-import time
 from scripts.utils.connexion_camera import connexionCamera
-from scripts.ia_module.vocal.voice_recognition_2 import voice_recognition_2
 
-def lancer_detection_couleur(session):
-    """
-    Lance le module de détection de 
-    couleurs dans un thread séparé 
-    """
-    print("[Thread detection] Demarrage du module de detection de couleurs")
-    try:
-        connexionCamera(session)
-    except Exception as e:
-        print(f"[Thead detection] Erreur: {e}")
+from scripts.ia_module.vocal.collecte_description import executer_collecte_vocale
 
-def lancer_reconnaissance_vocale(session):
-    """
-    Lance le module de reconnaissance
-    vocale dans un thread séparé
-    """
-    print("[Thead vocal] Demarrage du module de reconnaissance vocale")
-    try:
-        voice_recognition_2(session)
-    except Exception as e:
-        print(f"[thead vocal] Erreur: {e}")
-    
+
+def main(session, args) :
+    #connexionCamera(session)
+
+    executer_collecte_vocale(session)
+    return 0
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--ip", type=str, default="172.16.1.164",
-                        help="Robot IP address. On robot or Local Naoqi: use '172.16.1.164'.")
+    parser = argparse.ArgumentParser(description="Contrôle du robot NAO.")
+    parser.add_argument("--ip", type=str, default="172.16.1.163",
+                        help="Adresse IP du robot NAO (ex: 192.168.x.x)")
     parser.add_argument("--port", type=int, default=9559,
-                        help="Naoqi port number")
+                        help="Port NAOqi (par défaut: 9559)")
+    parser.add_argument("--test", action="store_true",
+                        help="Lancer uniquement le test TTS")
 
     args = parser.parse_args()
     session = qi.Session()
+
     try:
-        session.connect("tcp://" + args.ip + ":" + str(args.port))
+        session.connect(f"tcp://{args.ip}:{args.port}")
+        main(session, args)
     except RuntimeError:
-        print ("Can't connect to Naoqi at ip \"" + args.ip + "\" on port " + str(args.port) +".\n"
-               "Please check your script arguments. Run with -h option for help.")
+        print(f"Impossible de se connecter à NAOqi à l'adresse {args.ip}:{args.port}.")
         sys.exit(1)
-
-    # Création des deux threads
-    thread_detection = threading.Thread(target=lancer_detection_couleur, args=(session,))
-    thread_vocal = threading.Thread(target=lancer_reconnaissance_vocale, args=(session,))
-
-    # Démarrage des threads
-    thread_detection.start()
-    thread_vocal.start()
-
-    print("Les deux modules sont lances")
-    print("Appuyez sur 'q' dans la fenetre de detection pour arreter\n")
-
-    # Attendre que les threads se terminent
-    try:
-        thread_detection.join()
-        thread_vocal.join()
-    except KeyboardInterrupt:
-        print("\n Arret demande par l'utilisateur (Ctrl+C)")
-
-    
-
