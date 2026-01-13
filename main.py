@@ -3,9 +3,10 @@
 import qi
 import argparse
 import sys
+from scripts.utils.connexion_camera import connexionCamera
 
 def main(session, args) :
-    pass
+    connexionCamera(session)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Contrôle du robot NAO.")
