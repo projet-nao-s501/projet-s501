@@ -5,17 +5,23 @@ import argparse
 import sys
 from scripts.utils.connexion_camera import connexionCamera
 
+from scripts.ia_module.vocal.collecte_description import executer_collecte_vocale
+
+
 def main(session, args) :
+
+    executer_collecte_vocale(session)
     connexionCamera(session)
+    return 0
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Contrôle du robot NAO.")
-    parser.add_argument("--ip", type=str, default="127.0.0.1",
+    parser.add_argument("--ip", type=str, default="172.16.1.163",
                         help="Adresse IP du robot NAO (ex: 192.168.x.x)")
     parser.add_argument("--port", type=int, default=9559,
                         help="Port NAOqi (par défaut: 9559)")
     parser.add_argument("--test", action="store_true",
-                         help="Lancer uniquement le test TTS")
+                        help="Lancer uniquement le test TTS")
 
     args = parser.parse_args()
     session = qi.Session()
