@@ -96,4 +96,6 @@ def detection_formes(frame,tab,session):
         tts.say("J'ai trouvé !")
         naoDab(session)
         naoDanse(session)
-        return
+        return 0
+    
+    return 1

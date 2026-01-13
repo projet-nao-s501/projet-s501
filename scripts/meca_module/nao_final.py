@@ -129,7 +129,9 @@ def wait_and_update_display(video_service, name_id, step_name, tab,session,durat
             cv2.imshow("Exploration Robot", frame)
             
             # Appel de ta fonction d'analyse de formes sur le buffer frais
-            detection_formes(arr,tab,session)
+            win = detection_formes(arr,tab,session)
+
+            return win
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
@@ -157,7 +159,8 @@ def perform_vertical_scan(session, video_service, name_id, tab):
 
     motion.setAngles("HeadPitch", -0.6, 0.1)
     motion.setAngles(["LShoulderPitch", "RShoulderPitch"], [-0.5, -0.5], 0.1)
-    wait_and_update_display(video_service, name_id, "BAS",tab, session, 7.0)
+    win = wait_and_update_display(video_service, name_id, "BAS",tab, session, 7.0)
+    if win == 0: return 0
 
     # ZONE À RISQUE
     # On réduit légèrement la vitesse (0.03 au lieu de 0.05) pour plus de douceur
@@ -165,7 +168,8 @@ def perform_vertical_scan(session, video_service, name_id, tab):
     motion.setAngles(["LShoulderPitch", "RShoulderPitch"], [-0.4, -0.4], 0.03)
     motion.setAngles(["LElbowRoll", "RElbowRoll"], [0, 0], 0.03)
     motion.setAngles(["LHipPitch", "RHipPitch"], [-0.3, -0.3], 0.03) 
-    wait_and_update_display(video_service, name_id, "HAUT",tab, session, 7.0)
+    win = wait_and_update_display(video_service, name_id, "HAUT",tab, session, 7.0)
+    if win == 0: return 0
     
     # reset posture avant rotation
     print("Retour posture stable...")
@@ -179,6 +183,7 @@ def perform_vertical_scan(session, video_service, name_id, tab):
     
     print("Rotation...")
     motion.moveTo(0, 0, 1.0)
+    return 1
 
 def autonomous_exploration(session, img, video_service, name_id,tab):
     global yolo_model, visited_zones
@@ -210,11 +215,11 @@ def autonomous_exploration(session, img, video_service, name_id,tab):
         motion.stopMove()
         
         # On lance le scan ET la rotation (qui sont bloquants dans perform_vertical_scan)
-        perform_vertical_scan(session, video_service, name_id, tab)
+        win = perform_vertical_scan(session, video_service, name_id, tab)
         
         # IMPORTANT : On sort de la fonction ici pour que la boucle connexionCamera 
         # reprenne proprement sans exécuter le motion.move() du bas.
-        return 
+        return win
 
     # 4. SLAM (Logique de visite des zones)
     x, z = get_slam_position() 
@@ -226,7 +231,7 @@ def autonomous_exploration(session, img, video_service, name_id,tab):
                 motion.stopMove()
                 tts.say("Exploration terminée.")
                 sad(session)
-                return
+                return 0
 
     # 5. MARCHE PAR DÉFAUT (si rien n'est détecté)
     motion.move(0.08, 0, 0)

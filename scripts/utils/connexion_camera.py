@@ -53,8 +53,10 @@ def connexionCamera(session,tab):
 
         img = np.frombuffer(array, dtype=np.uint8).reshape((height, width, 3))
 
-        autonomous_exploration(session, img, video_service, name_id, tab)
-
+        win = autonomous_exploration(session, img, video_service, name_id, tab)
+        if win == 0 :
+            return
+        
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
