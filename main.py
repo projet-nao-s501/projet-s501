@@ -21,7 +21,7 @@ if __name__ == "__main__":
     parser.add_argument("--port", type=int, default=9559,
                         help="Port NAOqi (par défaut: 9559)")
     parser.add_argument("--test", action="store_true",
-                        help="Lancer uniquement le test TTS")
+                         help="Lancer uniquement le test TTS")
 
     args = parser.parse_args()
     session = qi.Session()
