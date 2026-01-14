@@ -1,7 +1,10 @@
 import qi
+import os
 import time
+import paramiko
 import threading
 import numpy as np
+from scp import SCPClient
 from spatialmath import SE3
 
 def offset_tf(original_tf, x_off=0.0, y_off=0.0, z_off=0.0):
@@ -167,11 +170,6 @@ def checker(session):
 
     posture.goToPosture("StandInit", 0.5)
 
-import os
-import paramiko
-from scp import SCPClient
-
-
 def send(session, nao_ip):
     local_path = os.path.join(
         os.path.dirname(__file__),
@@ -180,7 +178,6 @@ def send(session, nao_ip):
 
     remote_path = "/home/nao/audio/danse.wav"
 
-    # Upload file
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     ssh.connect(nao_ip, username="nao", password="nao")
