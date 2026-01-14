@@ -25,7 +25,7 @@ def stand_up(session):
     posture = session.service("ALRobotPosture")
     motion.wakeUp()
     posture.goToPosture("StandInit", 0.5)
-    print("✓ Robot Debout")
+    print("Robot Debout")
 
 
 # Met le robot en position assise et désactive les moteurs
@@ -35,7 +35,7 @@ def sit_down(session):
     posture = session.service("ALRobotPosture")
     posture.goToPosture("Sit", 0.5)
     motion.rest()
-    print("✓ Robot Assis (Moteurs coupés)")
+    print("Robot Assis (Moteurs coupés)")
 
 # Lance le moteur ORB-SLAM3 en arrière-plan via un sous-processus.
 # Configure l'environnement nécessaire
@@ -48,7 +48,7 @@ def start_slam_background():
     cmd = ["./mono_euroc", "ORBvoc.txt", "EuRoC.yaml", ".", "."]
     try:
         proc = subprocess.Popen(cmd, env=env, cwd=cwd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        print(f"✓ SLAM actif (PID: {proc.pid})")
+        print(f"SLAM actif (PID: {proc.pid})")
         return proc
     except Exception as e:
         print(f"Erreur lancement SLAM: {e}")
