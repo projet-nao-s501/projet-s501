@@ -1,21 +1,10 @@
 # -*- coding: utf-8 -*-
-"""
-Script de collecte de description pour recherche de personne - NAO Robot
-Utilise une approche vocale guidée par étapes pour maximiser la fiabilité
-Auteur: Junior - Équipe IA
-Date: Janvier 2026
-"""
-
 import sys
 import time
 import qi
 import argparse
 
 from scripts.utils.connexion_camera import connexionCamera
-
-# ============================================
-# CONFIGURATION
-# ============================================
 
 # Paramètres de connexion au robot
 DEFAULT_ROBOT_IP = "172.16.1.163"  
@@ -69,14 +58,8 @@ COULEURS = [
     "rose",
 ]
 
-# ============================================
-# FONCTIONS UTILITAIRES
-# ============================================
-
 def cleanup_services(asr, memory):
-    """
-    Nettoie proprement tous les services ASR et ALMemory avant de commencer
-    """
+    
     print("[CLEANUP] Nettoyage des services existants...")
     
     try:
@@ -116,9 +99,6 @@ def cleanup_services(asr, memory):
 
 
 def vider_word_recognized(memory):
-    """
-    Vide la clé WordRecognized dans ALMemory pour éviter les répétitions
-    """
     try:
         memory.insertData("WordRecognized", [])
     except:
@@ -126,10 +106,6 @@ def vider_word_recognized(memory):
 
 
 def initialiser_asr_vocabulaire(asr, vocabulaire):
-    """
-    Configure le service ASR avec un vocabulaire personnalisé
-    CRITIQUE : Vide WordRecognized AVANT et APRÈS changement de vocabulaire
-    """
     try:
         asr.pause(True)
         time.sleep(0.2)  # Petit délai pour s'assurer que le service est en pause
@@ -146,9 +122,7 @@ def initialiser_asr_vocabulaire(asr, vocabulaire):
 
 
 def attendre_mot(memory, vocabulaire, timeout, tentatives_max, message_erreur, tts):
-    """
-    Fonction générique pour attendre la reconnaissance d'un mot du vocabulaire
-    """
+
     tentatives = 0
     mot_detecte = None
     
@@ -219,15 +193,7 @@ def attendre_mot(memory, vocabulaire, timeout, tentatives_max, message_erreur, t
     
     return mot_detecte
 
-
-# ============================================
-# PHASE 1 : ATTENTE DU DÉCLENCHEUR
-# ============================================
-
 def initialiser_asr_phase1(asr):
-    """
-    Configure le service ASR avec le vocabulaire de la Phase 1
-    """
     print("[INIT ASR PHASE 1] Configuration du vocabulaire de déclenchement...")
     
     try:
@@ -250,9 +216,6 @@ def initialiser_asr_phase1(asr):
 
 
 def phase1_attente_declencheur(asr, tts, memory):
-    """
-    Phase 1 : Attend qu'un mot déclencheur soit prononcé
-    """
     print("\n[PHASE 1] ATTENTE DU DECLENCHEUR")
     
     # Message d'accueil
@@ -278,15 +241,8 @@ def phase1_attente_declencheur(asr, tts, memory):
         print("[ROBOT] Je n'ai pas reçu de commande. Je vais me mettre en veille.")
         return False
 
-
-# ============================================
-# PHASE 2 : COLLECTE DESCRIPTION DU HAUT
-# ============================================
-
 def phase2_collecte_haut(asr, tts, memory):
-    """
-    Phase 2 : Collecte guidée de la description du vêtement du haut
-    """
+
     print("\n[PHASE 2] COLLECTE DESCRIPTION DU HAUT")
     
     # CRITIQUE : Vider WordRecognized AVANT de commencer la phase 2
@@ -372,15 +328,8 @@ def phase2_collecte_haut(asr, tts, memory):
     
     return description_haut
 
-
-# ============================================
-# PHASE 3 : COLLECTE DESCRIPTION DU BAS
-# ============================================
-
 def phase3_collecte_bas(asr, tts, memory):
-    """
-    Phase 3 : Collecte guidée de la description du vêtement du bas
-    """
+
     print("\n[PHASE 3] COLLECTE DESCRIPTION DU BAS")
     
     # CRITIQUE : Vider WordRecognized AVANT de commencer la phase 3
@@ -463,15 +412,8 @@ def phase3_collecte_bas(asr, tts, memory):
     
     return description_bas
 
-
-# ============================================
-# PHASE 4 : CONFIRMATION
-# ============================================
-
 def phase4_confirmation(asr, tts, memory, description_haut, description_bas):
-    """
-    Phase 4 : Demande confirmation à l'utilisateur
-    """
+
     print("\n[PHASE 4] CONFIRMATION")
     
     # Vider avant de commencer
@@ -517,9 +459,7 @@ def phase4_confirmation(asr, tts, memory, description_haut, description_bas):
 # PHASE 5 : STOCKAGE ET LANCEMENT
 
 def phase5_stockage_et_lancement(memory, tts, description_haut, description_bas):
-    """
-    Phase 5 : Stocke les informations dans ALMemory et lance la recherche
-    """
+
     print("\n[PHASE 5] STOCKAGE ET LANCEMENT")
     
     try:
@@ -546,21 +486,7 @@ def phase5_stockage_et_lancement(memory, tts, description_haut, description_bas)
         print("[ERREUR PHASE 5] {}".format(e))
         return False
 
-# ============================================
-# FONCTION PRINCIPALE APPELABLE
-# ============================================
-
 def executer_collecte_vocale(session):
-    """
-    Fonction principale pour exécuter toute la collecte vocale
-    Peut être appelée depuis le main.py centralisé
-    
-    Args:
-        session: Session qi connectée au robot
-    
-    Returns:
-        int: 0 si succès, 1 si échec
-    """
    
     print("MODULE VOCAL - COLLECTE DESCRIPTION")
     
