@@ -1,9 +1,9 @@
 import cv2
 import numpy as np
 from scripts.meca_module.nao_final import autonomous_exploration, initialiser_exploration
-from scripts.ia_module.detection_couleurs import detection_couleurs_Camera
+from scripts.meca_module.reaction_nao import checker
 
-def connexionCamera(session):
+def connexionCamera(session,tab):
     video_service = session.service("ALVideoDevice")
     # Camera settings
     resolution = 1  # VGA (640x480)
@@ -29,6 +29,7 @@ def connexionCamera(session):
     name_id = video_service.subscribeCamera(name_id, camera_index, resolution, color_space, fps)
     print("Subscribed to camera:", name_id)
 
+    checker(session)
     initialiser_exploration(session)
 
     while True:
@@ -42,8 +43,10 @@ def connexionCamera(session):
 
         img = np.frombuffer(array, dtype=np.uint8).reshape((height, width, 3))
 
-        autonomous_exploration(session, img, video_service, name_id)
-
+        win = autonomous_exploration(session, img, video_service, name_id, tab)
+        if win == 0 :
+            return
+        
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 

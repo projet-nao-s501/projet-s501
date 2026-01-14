@@ -1,4 +1,11 @@
+import qi
+import os
 import time
+import paramiko
+import threading
+import numpy as np
+from scp import SCPClient
+from spatialmath import SE3
 
 def offset_tf(original_tf, x_off=0.0, y_off=0.0, z_off=0.0):
     new_tf = list(original_tf)
@@ -10,6 +17,7 @@ def offset_tf(original_tf, x_off=0.0, y_off=0.0, z_off=0.0):
 def naoDanse(session):
     motion = session.service("ALMotion")
     posture = session.service("ALRobotPosture")
+    audio = session.service("ALAudioPlayer")
 
     motion.wakeUp()
     posture.goToPosture("StandInit", 0.5)
@@ -18,6 +26,10 @@ def naoDanse(session):
     motion.wbFootState("Fixed", "Legs")
     motion.wbEnableBalanceConstraint(True, "Legs")
 
+    # audio.setVolume(0.7)
+    send(session, "172.16.1.163")
+
+    threading.Thread(target=lambda: audio.playFile("/home/nao/audio/danse.wav")).start()
     useSensorValues = False
     frame = 2 
     effectorList = ["LArm", "RArm"]
@@ -49,12 +61,14 @@ def naoDanse(session):
 
     motion.transformInterpolations(effectorList, frame, pathList, axisMaskList, timesList)
 
+    audio.stopAll()
     posture.goToPosture("StandInit", 0.5)
 
 def naoDab(session):
 
     motion = session.service("ALMotion")
     posture = session.service("ALRobotPosture")
+    tts = session.service("ALTextToSpeech")
 
     motion.wakeUp()
     posture.goToPosture("StandInit", 0.5)
@@ -88,6 +102,7 @@ def naoDab(session):
 
     motion.setAngles(names, angles, 0.4)
 
+    tts.say("Yay, j'ai trouvé !")
     posture.goToPosture("StandInit", 0.5)
 
 def sad(session):
@@ -155,6 +170,20 @@ def checker(session):
 
     posture.goToPosture("StandInit", 0.5)
 
+def send(session, nao_ip):
+    local_path = os.path.join(
+        os.path.dirname(__file__),
+        "danse.wav"
+    )
 
+    remote_path = "/home/nao/audio/danse.wav"
 
+    ssh = paramiko.SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    ssh.connect(nao_ip, username="nao", password="nao")
 
+    with SCPClient(ssh.get_transport()) as scp:
+        ssh.exec_command("mkdir -p /home/nao/audio")
+        scp.put(local_path, remote_path)
+
+    ssh.close()
