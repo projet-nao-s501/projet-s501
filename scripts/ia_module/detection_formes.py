@@ -19,7 +19,7 @@ vetements = {
 	"pantalon": "trousers",
 	"jupe": "skirt",
 	"robe-manche-courte": "short_sleeved_dress",
-	"robe-manche-30longue": "long_sleeved_dress",
+	"robe-manche-longue": "long_sleeved_dress",
 	"robe-tailleur": "vest_dress",
 	"robe-bretelle": "sling_dress"
 }

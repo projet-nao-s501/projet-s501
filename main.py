@@ -3,13 +3,12 @@
 import qi
 import argparse
 import sys
-from scripts.utils.connexion_camera import connexionCamera
-
 from scripts.ia_module.vocal.collecte_description import executer_collecte_vocale
+from scripts.meca_module.nao_final import sit_down
 
 
 def main(session, args) :
-
+    sit_down(session)
     executer_collecte_vocale(session)
     return 0
 

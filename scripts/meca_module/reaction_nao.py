@@ -13,6 +13,7 @@ def offset_tf(original_tf, x_off=0.0, y_off=0.0, z_off=0.0):
 def naoDanse(session):
     motion = session.service("ALMotion")
     posture = session.service("ALRobotPosture")
+    # audio = session.service("ALAudioPlayer")
 
     motion.wakeUp()
     posture.goToPosture("StandInit", 0.5)
@@ -20,6 +21,9 @@ def naoDanse(session):
     motion.wbEnable(True)
     motion.wbFootState("Fixed", "Legs")
     motion.wbEnableBalanceConstraint(True, "Legs")
+
+    # audio.setVolume(0.7)
+    # audio.playFile("./scripts/meca_module")
 
     useSensorValues = False
     frame = 2 
@@ -52,6 +56,7 @@ def naoDanse(session):
 
     motion.transformInterpolations(effectorList, frame, pathList, axisMaskList, timesList)
 
+    # audio.stop()
     posture.goToPosture("StandInit", 0.5)
 
 def naoDab(session):
