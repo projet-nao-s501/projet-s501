@@ -1,12 +1,13 @@
 import cv2
 import numpy as np
-from scripts.ia_module.traitement_image import detectionRouge
+from scripts.meca_module.nao_final import autonomous_exploration, initialiser_exploration
+from scripts.meca_module.reaction_nao import checker
 
-def connexionCamera(session):
+def connexionCamera(session,tab):
     video_service = session.service("ALVideoDevice")
     # Camera settings
     resolution = 1  # VGA (640x480)
-    color_space = 11  # RGB
+    color_space = 13  # RGB
     fps = 30
     camera_index = 1  # Use 0 or 1 depending on which one works
 
@@ -28,6 +29,9 @@ def connexionCamera(session):
     name_id = video_service.subscribeCamera(name_id, camera_index, resolution, color_space, fps)
     print("Subscribed to camera:", name_id)
 
+    checker(session)
+    initialiser_exploration(session)
+
     while True:
         image = video_service.getImageRemote(name_id)
         if image is None:
@@ -36,15 +40,13 @@ def connexionCamera(session):
 
         width, height = image[0], image[1]
         array = image[6]
+
         img = np.frombuffer(array, dtype=np.uint8).reshape((height, width, 3))
 
-        img2 = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
-        result = detectionRouge(img2)
+        win = autonomous_exploration(session, img, video_service, name_id, tab)
+        if win == 0 :
+            return
         
-        cv2.imshow("Detection du rouge", result)
-        
-        img = cv2.resize(img, (224, 224), interpolation=cv2.INTER_AREA)
-
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
