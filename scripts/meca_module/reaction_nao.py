@@ -58,6 +58,7 @@ def naoDab(session):
 
     motion = session.service("ALMotion")
     posture = session.service("ALRobotPosture")
+    tts = session.service("ALTextToSpeech")
 
     motion.wakeUp()
     posture.goToPosture("StandInit", 0.5)
@@ -91,13 +92,8 @@ def naoDab(session):
 
     motion.setAngles(names, angles, 0.4)
 
+    tts.say("Yay, j'ai trouvé !")
     posture.goToPosture("StandInit", 0.5)
-
-
-import time
-
-import qi
-import time
 
 def sad(session):
 

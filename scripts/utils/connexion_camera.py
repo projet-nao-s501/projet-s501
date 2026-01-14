@@ -1,8 +1,7 @@
 import cv2
 import numpy as np
 from scripts.meca_module.nao_final import autonomous_exploration, initialiser_exploration
-from scripts.ia_module.traitement_image import detectionRouge, detecter_couleur
-from scripts.ia_module.vocal.voice_recognition_2 import voice_recognition_2
+from scripts.meca_module.reaction_nao import checker
 
 def connexionCamera(session,tab):
     video_service = session.service("ALVideoDevice")
@@ -40,6 +39,7 @@ def connexionCamera(session,tab):
     # Variable pour éviter de répéter l'annonce à chaque frame
     derniere_couleur_annoncee = None
 
+    checker(session)
     initialiser_exploration(session)
 
     while True:
